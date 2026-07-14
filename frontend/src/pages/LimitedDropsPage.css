@@ -1,0 +1,408 @@
+.storefront-drops-container {
+  min-height: 100vh;
+  background-color: #090909;
+  color: #ffffff;
+  padding: 8rem 2rem 4rem 2rem;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Banner section */
+.drops-header-banner {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 4rem auto;
+}
+
+.gold-sub-heading {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #d4af37;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.drops-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1a1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.drops-sub-title {
+  font-size: 1rem;
+  color: #9ca3af;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.master-clock-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background-color: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #d4af37;
+}
+
+.clock-icon.pulsing-glow {
+  animation: pulseGlow 1.5s infinite ease-in-out;
+}
+
+/* Drops Grid Layout */
+.drops-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.drop-release-card {
+  background-color: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.drop-release-card:hover {
+  transform: translateY(-4px);
+  border-color: #d4af37;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+/* Card States */
+.drop-release-card.sold-out {
+  opacity: 0.65;
+}
+
+/* Vaulted Watermark */
+.archived-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-family: 'Playfair Display', serif;
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: rgba(239, 68, 68, 0.12);
+  border: 2px double rgba(239, 68, 68, 0.15);
+  padding: 0.3rem 1.25rem;
+  letter-spacing: 4px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Image styling */
+.drop-card-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background-color: #0c0c0c;
+}
+
+.drop-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s ease;
+}
+
+.drop-release-card:hover .drop-card-image {
+  transform: scale(1.05);
+}
+
+/* Status pills */
+.live-pill-tag,
+.soldout-pill-tag,
+.scheduled-pill-tag {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 0.3rem 0.75rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  z-index: 10;
+}
+
+.live-pill-tag {
+  background-color: rgba(34, 197, 94, 0.9);
+  color: #000000;
+}
+
+.live-pulsing-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #000000;
+  border-radius: 50%;
+  animation: pulseGlow 1s infinite ease-in-out;
+}
+
+.soldout-pill-tag {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+}
+
+.scheduled-pill-tag {
+  background-color: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Card details block */
+.drop-card-content-block {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.drop-card-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.drop-id-font {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  font-family: monospace;
+}
+
+.drop-price-font {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #d4af37;
+}
+
+.drop-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+/* Countdown element */
+.countdown-display-block {
+  margin-bottom: 0.75rem;
+}
+
+.release-date-subtext {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.countdown-timer-grid {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.countdown-time-box {
+  background-color: #090909;
+  border: 1px solid #1f1f1f;
+  border-radius: 4px;
+  padding: 0.25rem;
+  min-width: 38px;
+  text-align: center;
+}
+
+.time-number {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #d4af37;
+  line-height: 1;
+  margin-bottom: 0.1rem;
+}
+
+.time-lbl {
+  font-size: 0.45rem;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+  font-weight: 700;
+}
+
+.countdown-time-divider {
+  font-weight: 800;
+  color: #d4af37;
+  font-size: 1.2rem;
+}
+
+/* Live details element */
+.live-details-block {
+  margin-bottom: 1.5rem;
+}
+
+.stock-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.stock-progress-track {
+  width: 100%;
+  height: 4px;
+  background-color: #1f1f1f;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stock-progress-fill {
+  height: 100%;
+  background-color: #22c55e;
+  border-radius: 2px;
+  transition: width 0.5s ease-in-out;
+}
+
+/* Sold Out Banner */
+.sold-out-details-block {
+  margin-bottom: 1.5rem;
+}
+
+.vault-date-subtext {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.sold-out-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+
+/* Action button area */
+.drop-card-action-box {
+  margin-top: auto;
+}
+
+.secure-drop-btn {
+  width: 100%;
+  padding: 0.65rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.secure-drop-btn.live {
+  background-color: #d4af37;
+  color: #000000;
+}
+
+.secure-drop-btn.live:hover {
+  background-color: #ffffff;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
+}
+
+.secure-drop-btn.locked {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #4b5563;
+  cursor: not-allowed;
+}
+
+.secure-drop-btn.vaulted {
+  background-color: #141414;
+  border: 1px solid #1f1f1f;
+  color: #4b5563;
+  cursor: not-allowed;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.65; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .storefront-drops-container {
+    padding: 6rem 1.5rem 3rem 1.5rem;
+  }
+  .drops-main-title {
+    font-size: 2.25rem;
+  }
+}
+
+/* Empty State */
+.empty-gothic-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 2rem;
+  gap: 0.75rem;
+  background-color: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 3rem auto;
+}
+
+.empty-illustration-icon {
+  color: #9ca3af;
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+  margin-bottom: 0.5rem;
+}
+
+.empty-gothic-state h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.empty-gothic-state p {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  max-width: 320px;
+  line-height: 1.5;
+}

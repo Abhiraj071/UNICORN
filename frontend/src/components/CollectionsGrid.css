@@ -1,0 +1,319 @@
+.collections {
+  padding: 4rem 0;
+  background-color: var(--black-900);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 1.7rem;
+  font-weight: 400;
+  /* margin-top: 0.5rem; */
+  /* margin-bottom: 0.5rem; */
+  letter-spacing: 2px;
+  color: var(--white);
+}
+
+.section-subtitle {
+  color: var(--gray-500);
+  letter-spacing: 2px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.divider-with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  /* margin: 1rem 0; */
+  width: 100%;
+  font-weight: bolder;
+}
+
+.divider-with-icon::before,
+.divider-with-icon::after {
+  content: '';
+  height: 1px;
+  background-color: var(--border-color);
+  width: 80px;
+}
+
+.divider-gothic-cross {
+  color: var(--gray-500);
+}
+
+.section-desc {
+  font-family: var(--font-body);
+  color: var(--gray-400);
+  font-size: 0.9rem;
+  /* margin-top: 0.5rem; */
+}
+
+/* Card Grid Layout */
+.collections-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Card Styling */
+.collection-card-v2 {
+  background-color: #0d0d0d;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  height: 300px;
+  transition: all 0.4s ease;
+  text-decoration: none;
+  position: relative;
+}
+
+.collection-card-v2:hover {
+  border-color: var(--hover-border);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Alternate row directions based on classes */
+.collection-card-v2.oversized {
+  flex-direction: row;
+}
+
+.collection-card-v2.limited {
+  flex-direction: row-reverse;
+  border-color: #1a1a1a;
+}
+
+.collection-card-v2.urban {
+  flex-direction: row;
+}
+
+.collection-card-v2.new {
+  flex-direction: row-reverse;
+}
+
+/* Image Section */
+.col-image-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.col-image-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.72);
+  z-index: 2;
+  transition: background 0.3s ease;
+}
+
+.collection-card-v2:hover .col-image-wrapper::after {
+  background: rgba(10, 10, 10, 0.62);
+}
+
+.mockup-crop {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center top;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.collection-card-v2:hover .mockup-crop {
+  transform: scale(1.05);
+}
+
+.crop-oversized {
+  background-image: url('/images/col_oversized.png');
+}
+
+.crop-limited {
+  background-image: url('/images/col_limited.png');
+}
+
+.crop-urban {
+  background-image: url('/images/col_urban.png');
+}
+
+.crop-new {
+  background-image: url('/images/col_new.png');
+}
+
+/* Content Section */
+.col-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  padding: 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.col-num {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  position: relative;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+  line-height: 1;
+}
+
+.col-num::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  height: 1px;
+  background-color: var(--gray-600);
+}
+
+.col-title {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+  color: var(--white);
+  letter-spacing: 1px;
+  white-space: pre-line;
+}
+
+.col-desc {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--gray-400);
+  margin-bottom: auto;
+}
+
+/* Explore Link Actions */
+.col-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--white);
+  /* margin-top: 1rem; */
+  transition: all 0.3s ease;
+}
+
+.col-action .arrow-icon {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.collection-card-v2:not(.limited) .col-action:hover {
+  color: var(--gray-300);
+}
+
+.collection-card-v2:not(.limited) .col-action:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+/* Limited Drop special button design */
+.limited .col-action {
+  background-color: #d1d1d1;
+  color: #0a0a0a;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.limited .col-action:hover {
+  background-color: #e2e2e2;
+}
+
+.limited .col-action .arrow-icon {
+  color: #0a0a0a;
+}
+
+.limited .col-action:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+/* Limited extra clock tag styling */
+.col-extra {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #bfa370;
+  margin-top: 1rem;
+  line-height: 1;
+}
+
+.col-extra .clock-icon {
+  font-size: 0.9rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .collections-grid-2x2 {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .collection-card-v2 {
+    height: 300px;
+  }
+}
+
+@media (max-width: 640px) {
+
+  .collection-card-v2,
+  .collection-card-v2.limited,
+  .collection-card-v2.new {
+    height: 300px;
+    position: relative;
+  }
+
+  .col-image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .col-content {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    padding: 2rem 1.5rem;
+  }
+}

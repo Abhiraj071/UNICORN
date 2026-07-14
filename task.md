@@ -1,0 +1,5 @@
+- [x] Add `/complete-profile` route and update banner link in `App.jsx`
+- [x] Create `CompleteProfile.jsx` page component with form inputs and state logic
+- [x] Create `CompleteProfile.css` styling
+- [x] Implement localStorage coupon lookup and flat/percentage discount logic in `Checkout.jsx`
+- [x] Verify everything compiles and run a build checks

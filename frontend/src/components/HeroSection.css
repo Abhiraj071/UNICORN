@@ -1,0 +1,281 @@
+.hero {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.hero-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(3, 3, 3, 0.9) 0%, rgba(3, 3, 3, 0.4) 50%, rgba(3, 3, 3, 0.1) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-top: 80px;
+  /* Offset for navbar */
+  margin: 0 auto;
+}
+
+/* .hero-text {
+  max-width: 800px;
+} */
+
+@media (min-width: 1025px) {
+  .hero-text {
+    /* max-width: calc(50vw - 10rem); */
+    margin-left: 1.25rem;
+  }
+
+  .scroll-indicator {
+    margin-left: 1.25rem;
+  }
+}
+
+.cross-icon {
+  color: var(--gray-400);
+  margin-bottom: 1.5rem;
+  display: inline-block;
+}
+
+.subtitle {
+  font-size: 1rem;
+  letter-spacing: 6px;
+  color: var(--gray-400);
+  margin-bottom: 1.5rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.title {
+  letter-spacing: 8px;
+  font-size: 3.5rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  font-weight: 1000;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.divider {
+  width: 40px;
+  height: 1px;
+  background-color: var(--gray-500);
+  margin-bottom: 1.5rem;
+}
+
+.description {
+  font-size: 0.95rem;
+  color: var(--gray-400);
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+
+.btn-explore {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 28px;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white);
+  background: transparent;
+  border: 1px solid var(--gray-700);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-explore:hover {
+  background: var(--white);
+  color: var(--black-900);
+  border-color: var(--white);
+}
+
+.btn-explore .arrow-icon {
+  margin-left: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.btn-explore:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 3rem;
+  left: 4rem;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  height: 50px;
+}
+
+.scroll-line {
+  width: 1px;
+  background-color: var(--gray-700);
+}
+
+.scroll-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.scroll-text {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: var(--gray-400);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.scroll-arrow {
+  color: var(--gray-400);
+  font-size: 1.1rem;
+  line-height: 1;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-6px);
+  }
+
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-overlay {
+    background: linear-gradient(to bottom, rgba(3, 3, 3, 0.6) 0%, rgba(3, 3, 3, 0.8) 100%);
+  }
+
+  .title {
+    font-size: 2.8rem;
+  }
+
+  .scroll-indicator {
+    left: 2rem;
+  }
+}
+
+/* Screen height constraints */
+@media (max-height: 750px) {
+  .hero {
+    align-items: flex-start;
+    padding-top: 110px;
+  }
+
+  .hero-content {
+    padding-top: 0;
+  }
+
+  .cross-icon {
+    display: inline-block;
+    margin-bottom: 0.8rem;
+  }
+
+  .subtitle {
+    margin-bottom: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .title {
+    font-size: 3.2rem;
+    margin-bottom: 1rem;
+    line-height: 1.15;
+  }
+
+  .divider {
+    margin-bottom: 1rem;
+  }
+
+  .description {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .btn-explore {
+    padding: 10px 24px;
+    font-size: 0.8rem;
+  }
+
+  .scroll-indicator {
+    bottom: 3rem;
+    display: flex;
+  }
+}
+
+@media (max-height: 620px) {
+  .hero {
+    padding-top: 95px;
+  }
+
+  .cross-icon {
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    margin-bottom: 0.5rem;
+  }
+
+  .title {
+    font-size: 2.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .divider {
+    margin-bottom: 0.8rem;
+  }
+
+  .description {
+    margin-bottom: 1.2rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .btn-explore {
+    padding: 8px 20px;
+  }
+
+  .scroll-indicator {
+    bottom: 2.5rem;
+    display: flex;
+  }
+}

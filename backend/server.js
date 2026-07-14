@@ -55,7 +55,7 @@ if (process.env.NODE_ENV === 'production') {
   const distPath = path.join(__dirname, '../frontend/dist');
   app.use(express.static(distPath));
   
-  app.get('*', (req, res) => {
+  app.get('/*splat', (req, res) => {
     // Prevent catching API routes that might be spelling mistakes
     if (req.path.startsWith('/api/')) {
       return res.status(404).json({ message: 'API Route Not Found' });

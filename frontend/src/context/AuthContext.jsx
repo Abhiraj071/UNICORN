@@ -77,10 +77,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const sendOtp = async (phone) => {
+  const sendOtp = async (phoneOrEmail) => {
     setError(null);
     try {
-      const { data } = await api.post('/auth/otp/send', { phone });
+      const { data } = await api.post('/auth/otp/send', { phoneOrEmail });
       return data;
     } catch (err) {
       const message = err.response?.data?.message || 'Failed to send OTP. Please try again.';
@@ -89,10 +89,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOtp = async (phone, otp) => {
+  const verifyOtp = async (phoneOrEmail, otp) => {
     setError(null);
     try {
-      const { data } = await api.post('/auth/otp/verify', { phone, otp });
+      const { data } = await api.post('/auth/otp/verify', { phoneOrEmail, otp });
       setUser(data);
       return data;
     } catch (err) {

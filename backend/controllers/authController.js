@@ -151,54 +151,117 @@ const updateUserRole = async (req, res) => {
   }
 };
 
-// @desc    Send OTP to phone
+// @desc    Send OTP to phone or email
 // @route   POST /api/auth/otp/send
 // @access  Public
 const sendOTP = async (req, res) => {
-  const { phone } = req.body;
+  const { phoneOrEmail } = req.body;
 
-  if (!phone) {
-    return res.status(400).json({ message: 'Please enter a phone number' });
+  if (!phoneOrEmail) {
+    return res.status(400).json({ message: 'Please enter a phone number or email address' });
   }
 
-  // Validate phone format
-  const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
-  if (!phoneRegex.test(phone.trim())) {
-    return res.status(400).json({ message: 'Please enter a valid phone number' });
-  }
+  const input = phoneOrEmail.trim();
+  const isEmail = input.includes('@');
 
   try {
-    const formattedPhone = phone.trim();
-    let user = await User.findOne({ phone: formattedPhone });
+    let query = {};
+    let formattedPhone = '';
+    let formattedEmail = '';
+
+    if (isEmail) {
+      formattedEmail = input.toLowerCase();
+      // Simple email validation
+      if (!/\S+@\S+\.\S+/.test(formattedEmail)) {
+        return res.status(400).json({ message: 'Please enter a valid email address' });
+      }
+      query = { email: formattedEmail };
+    } else {
+      formattedPhone = input;
+      // Validate phone format
+      const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
+      if (!phoneRegex.test(formattedPhone)) {
+        return res.status(400).json({ message: 'Please enter a valid phone number (at least 10 digits)' });
+      }
+      query = { phone: formattedPhone };
+    }
+
+    let user = await User.findOne(query);
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    // Twilio SMS Integration
-    let smsSent = false;
-    if (process.env.TWILIO_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
-      try {
-        const twilio = require('twilio');
-        const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
-        await client.messages.create({
-          body: `Your UNICORN verification code is: ${otp}. It will expire in 5 minutes.`,
-          from: process.env.TWILIO_PHONE_NUMBER,
-          to: formattedPhone,
-        });
-        smsSent = true;
-        console.log(`[Twilio SMS] Sent OTP code successfully to ${formattedPhone}`);
-      } catch (err) {
-        console.error('Twilio SMS delivery failed, falling back to console log:', err);
+    let otpSent = false;
+
+    if (isEmail) {
+      // Send Email OTP using nodemailer if configured
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        try {
+          const nodemailer = require('nodemailer');
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+          });
+
+          const mailOptions = {
+            from: `"UNICORN Store" <${process.env.SMTP_USER}>`,
+            to: formattedEmail,
+            subject: 'Your UNICORN Verification Code',
+            text: `Your verification code is: ${otp}. It will expire in 5 minutes.`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #d4a359; text-align: center;">UNICORN STORE</h2>
+                <p>Hello,</p>
+                <p>Your one-time verification code is:</p>
+                <div style="font-size: 24px; font-weight: bold; letter-spacing: 4px; text-align: center; margin: 20px 0; padding: 10px; background-color: #f9f9f9; color: #111; border-radius: 5px;">
+                  ${otp}
+                </div>
+                <p>This code will expire in 5 minutes.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin-top: 20px;" />
+                <p style="font-size: 11px; color: #999; text-align: center;">This is an automated verification email. Please do not reply.</p>
+              </div>
+            `,
+          };
+
+          await transporter.sendMail(mailOptions);
+          otpSent = true;
+          console.log(`[Email OTP] Sent verification code successfully to ${formattedEmail}`);
+        } catch (err) {
+          console.error('Nodemailer sending failed, falling back to console log:', err);
+        }
+      }
+    } else {
+      // Send Twilio SMS OTP if configured
+      if (process.env.TWILIO_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+        try {
+          const twilio = require('twilio');
+          const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+          await client.messages.create({
+            body: `Your UNICORN verification code is: ${otp}. It will expire in 5 minutes.`,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: formattedPhone,
+          });
+          otpSent = true;
+          console.log(`[Twilio SMS] Sent OTP code successfully to ${formattedPhone}`);
+        } catch (err) {
+          console.error('Twilio SMS delivery failed, falling back to console log:', err);
+        }
       }
     }
 
     if (!user) {
-      // Create new user skeleton
-      const lastFour = formattedPhone.slice(-4);
+      // Create skeleton user
+      const defaultName = isEmail ? formattedEmail.split('@')[0] : `User-${formattedPhone.slice(-4)}`;
       user = await User.create({
-        phone: formattedPhone,
-        name: `User-${lastFour}`,
+        phone: isEmail ? undefined : formattedPhone,
+        email: isEmail ? formattedEmail : undefined,
+        name: defaultName,
         otp,
         otpExpires,
       });
@@ -208,11 +271,13 @@ const sendOTP = async (req, res) => {
       await user.save();
     }
 
-    console.log(`[OTP Services] Sent OTP ${otp} to phone number ${formattedPhone}`);
+    console.log(`[OTP Services] Generated OTP ${otp} for ${input}`);
 
     res.status(200).json({
-      message: smsSent ? 'Verification code sent via SMS successfully' : 'Verification code sent successfully (simulated)',
-      otp: smsSent ? undefined : otp, // Expose OTP only if NOT sent via SMS
+      message: otpSent 
+        ? `Verification code sent successfully via ${isEmail ? 'email' : 'SMS'}` 
+        : 'Verification code generated (simulated)',
+      otp: otpSent ? undefined : otp, // Only expose OTP if fallback simulation is active
     });
   } catch (error) {
     console.error('Error sending OTP:', error);
@@ -224,15 +289,18 @@ const sendOTP = async (req, res) => {
 // @route   POST /api/auth/otp/verify
 // @access  Public
 const verifyOTP = async (req, res) => {
-  const { phone, otp } = req.body;
+  const { phoneOrEmail, otp } = req.body;
 
-  if (!phone || !otp) {
-    return res.status(400).json({ message: 'Please provide phone number and OTP' });
+  if (!phoneOrEmail || !otp) {
+    return res.status(400).json({ message: 'Please provide phone/email and OTP' });
   }
 
+  const input = phoneOrEmail.trim();
+  const isEmail = input.includes('@');
+
   try {
-    const formattedPhone = phone.trim();
-    const user = await User.findOne({ phone: formattedPhone });
+    const query = isEmail ? { email: input.toLowerCase() } : { phone: input };
+    const user = await User.findOne(query);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -248,7 +316,9 @@ const verifyOTP = async (req, res) => {
     await user.save();
 
     // Check if user profile is completed (needs name & email set)
-    const isNewUser = !user.email || !user.name || user.name.startsWith('User-');
+    // Google users or pre-existing standard users might have name and email set.
+    // Skeleton users created with sendOTP will have default name 'User-XXXX' and undefined email/phone.
+    const isNewUser = !user.email || !user.phone || !user.name || user.name.startsWith('User-');
 
     // Generate JWT cookie
     generateToken(res, user._id);

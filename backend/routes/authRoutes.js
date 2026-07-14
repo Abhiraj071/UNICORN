@@ -10,6 +10,8 @@ const {
   updateUserProfile,
   getUsers,
   updateUserRole,
+  sendOTP,
+  verifyOTP,
 } = require('../controllers/authController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -25,6 +27,10 @@ router.route('/')
   .get(protect, admin, getUsers);
 router.route('/:id/role')
   .put(protect, admin, updateUserRole);
+
+// OTP routes
+router.post('/otp/send', sendOTP);
+router.post('/otp/verify', verifyOTP);
 
 // Google OAuth routes
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));

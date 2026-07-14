@@ -6,10 +6,11 @@ import './CompleteProfile.css';
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, updateProfile } = useAuth();
 
   // Form States
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const [fullName, setFullName] = useState('');
@@ -38,12 +39,17 @@ const CompleteProfile = () => {
     if (!authLoading && !user) {
       navigate('/login?redirect=complete-profile');
     } else if (user) {
-      setFullName(user.name || '');
-      // If phone is already saved, prefill or redirect
-      const savedPhone = localStorage.getItem(`unicorn_phone_${user._id}`);
-      if (savedPhone) {
-        setPhone(savedPhone);
+      // If the name is just a placeholder "User-XXXX", leave fullName blank so they must type it.
+      const defaultNamePattern = /^User-\d{4}$/;
+      if (user.name && !defaultNamePattern.test(user.name)) {
+        setFullName(user.name);
+      } else {
+        setFullName('');
       }
+
+      setEmail(user.email || '');
+      setPhone(user.phone || '');
+
       const savedDob = localStorage.getItem(`unicorn_dob_${user._id}`);
       if (savedDob) {
         setDob(savedDob);
@@ -55,17 +61,22 @@ const CompleteProfile = () => {
     }
   }, [user, authLoading, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!phone || !fullName || !addressLine1 || !city || !selectedState || !pincode || !dob || !gender) {
+    if (!phone || !fullName || !email || !addressLine1 || !city || !selectedState || !pincode || !dob || !gender) {
       setErrorMsg('Please fill in all required fields marked with *');
       return;
     }
 
     if (!/^\+?([0-9\s-]{8,15})$/.test(phone.trim())) {
       setErrorMsg('Please enter a valid phone number.');
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email.trim())) {
+      setErrorMsg('Please enter a valid email address.');
       return;
     }
 
@@ -76,41 +87,44 @@ const CompleteProfile = () => {
 
     setLoading(true);
 
-    setTimeout(() => {
-      try {
-        // Save simulated phone, DOB, and gender
-        localStorage.setItem(`unicorn_phone_${user._id}`, phone.trim());
-        localStorage.setItem(`unicorn_dob_${user._id}`, dob);
-        localStorage.setItem(`unicorn_gender_${user._id}`, gender);
+    try {
+      // Save name and email to MongoDB database
+      await updateProfile({
+        name: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim()
+      });
 
-        // Save default shipping address
-        const userAddrKey = `unicorn_addresses_${user._id}`;
-        const addressData = {
-          id: 'default-1',
-          label: 'Default Shipping',
-          fullName: fullName.trim(),
-          phone: phone.trim(),
-          addressLine1: addressLine1.trim(),
-          addressLine2: addressLine2.trim(),
-          city: city.trim(),
-          state: selectedState,
-          pincode: pincode.trim(),
-          isDefault: true
-        };
+      // Save additional simulated profile details in localStorage
+      localStorage.setItem(`unicorn_phone_${user._id}`, phone.trim());
+      localStorage.setItem(`unicorn_dob_${user._id}`, dob);
+      localStorage.setItem(`unicorn_gender_${user._id}`, gender);
 
-        // Write address array to local storage
-        localStorage.setItem(userAddrKey, JSON.stringify([addressData]));
+      // Save default shipping address
+      const userAddrKey = `unicorn_addresses_${user._id}`;
+      const addressData = {
+        id: 'default-1',
+        label: 'Default Shipping',
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        addressLine1: addressLine1.trim(),
+        addressLine2: addressLine2.trim(),
+        city: city.trim(),
+        state: selectedState,
+        pincode: pincode.trim(),
+        isDefault: true
+      };
 
-        setLoading(false);
-        setShowModal(true);
-      } catch (err) {
-        setLoading(false);
-        setErrorMsg('Failed to save details. Please try again.');
-      }
-    }, 1200);
+      // Write address array to local storage
+      localStorage.setItem(userAddrKey, JSON.stringify([addressData]));
+
+      setLoading(false);
+      setShowModal(true);
+    } catch (err) {
+      setLoading(false);
+      setErrorMsg(err.message || 'Failed to save details. Please try again.');
+    }
   };
-
-
 
   if (authLoading) {
     return (
@@ -141,7 +155,7 @@ const CompleteProfile = () => {
       <section className="profile-completion-content">
         <div className="container completion-layout-grid">
             <form onSubmit={handleSubmit} className="completion-form-box">
-              <h2 className="completion-form-title">REQUIRED Blueprints</h2>
+              <h2 className="completion-form-title">REQUIRED Details</h2>
               {errorMsg && <div className="completion-error-banner">{errorMsg}</div>}
 
               <div className="form-sections-stack">
@@ -150,9 +164,22 @@ const CompleteProfile = () => {
                   <h3 className="subcard-title">
                     <FiPhone className="subcard-icon" /> 1. PERSONAL DETAILS & CONTACT
                   </h3>
+                  
+                  <div className="form-group-custom">
+                    <label className="form-label-custom">Full Name *</label>
+                    <input 
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="auth-input-field-custom"
+                      required
+                    />
+                  </div>
+
                   <div className="form-grid-2x2">
                     <div className="form-group-custom">
-                      <label className="form-label-custom">Phone Number *</label>
+                      <label className="form-label-custom">Phone Number * (Verified)</label>
                       <input 
                         type="tel"
                         value={phone}
@@ -160,8 +187,23 @@ const CompleteProfile = () => {
                         placeholder="e.g. +91 98765 43210"
                         className="auth-input-field-custom"
                         required
+                        disabled={user && user.phone} // Read-only for OTP verified numbers
                       />
                     </div>
+                    <div className="form-group-custom">
+                      <label className="form-label-custom">Email Address *</label>
+                      <input 
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="e.g. name@example.com"
+                        className="auth-input-field-custom"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-grid-2x2" style={{ marginTop: '0.85rem' }}>
                     <div className="form-group-custom">
                       <label className="form-label-custom">Date of Birth *</label>
                       <input 
@@ -172,21 +214,21 @@ const CompleteProfile = () => {
                         required
                       />
                     </div>
-                  </div>
-                  <div className="form-group-custom">
-                    <label className="form-label-custom">Gender *</label>
-                    <select 
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
-                      className="form-select-custom"
-                      required
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
+                    <div className="form-group-custom">
+                      <label className="form-label-custom">Gender *</label>
+                      <select 
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="form-select-custom"
+                        required
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -195,18 +237,6 @@ const CompleteProfile = () => {
                   <h3 className="subcard-title">
                     <FiMapPin className="subcard-icon" /> 2. DEFAULT SHIPPING ADDRESS
                   </h3>
-
-                  <div className="form-group-custom">
-                    <label className="form-label-custom">Receiver Full Name *</label>
-                    <input 
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="e.g. Abhishek Vishwakarma"
-                      className="auth-input-field-custom"
-                      required
-                    />
-                  </div>
 
                   <div className="form-grid-2x2">
                     <div className="form-group-custom">

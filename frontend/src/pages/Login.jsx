@@ -2,13 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   FiUser, 
-  FiMail, 
   FiPhone, 
   FiLock, 
-  FiEye, 
-  FiEyeOff, 
   FiArrowRight, 
-  FiAlertCircle 
+  FiAlertCircle,
+  FiArrowLeft
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
@@ -18,36 +16,28 @@ const Login = () => {
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
 
-  const { user, loading: authLoading, login, register, error: authError } = useAuth();
+  const { user, loading: authLoading, sendOtp, verifyOtp, error: authError } = useAuth();
 
-  // Toggle state between Login and Signup
-  const [isLogin, setIsLogin] = useState(true);
+  // Navigation Steps: 'phone' | 'otp'
+  const [step, setStep] = useState('phone');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [testingOtp, setTestingOtp] = useState('');
 
-  // Form Field States
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
-
-  const [regName, setRegName] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPhone, setRegPhone] = useState('');
-  const [regPassword, setRegPassword] = useState('');
-  const [regConfirmPassword, setRegConfirmPassword] = useState('');
-  const [agreeTerms, setAgreeTerms] = useState(false);
-
-  // Password Visibility States
-  const [showPassword, setShowPassword] = useState(false);
-  const [showRegPassword, setShowRegPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Local Validation Error States
+  // UI state
   const [validationError, setValidationError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already logged in
+  // Redirect if user is already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      navigate(redirect);
+      // Check if it's a new user who needs to complete their profile details
+      const isNewUser = !user.email || !user.name || user.name.startsWith('User-');
+      if (isNewUser) {
+        navigate(`/complete-profile?redirect=${encodeURIComponent(redirect)}`);
+      } else {
+        navigate(redirect);
+      }
     }
   }, [user, authLoading, navigate, redirect]);
 
@@ -63,74 +53,78 @@ const Login = () => {
         fontSize: '1.2rem',
         letterSpacing: '1px'
       }}>
-        LOADING...
+        SUMMONING SESSION...
       </div>
     );
   }
 
-  // Handle Login Submit
-  const handleLoginSubmit = async (e) => {
+  // Phase 1: Request OTP
+  const handleSendOtpSubmit = async (e) => {
     e.preventDefault();
     setValidationError('');
-    
-    if (!email || !password) {
-      setValidationError('Please fill in all required fields.');
+
+    if (!phone) {
+      setValidationError('Please enter your phone number.');
+      return;
+    }
+
+    // Basic 10-digit check
+    const cleanPhone = phone.trim().replace(/[\s-]/g, '');
+    if (!/^\+?[0-9]{10,15}$/.test(cleanPhone)) {
+      setValidationError('Please enter a valid 10-digit phone number.');
       return;
     }
 
     setLoading(true);
     try {
-      await login(email, password);
-      navigate(redirect);
+      const res = await sendOtp(phone.trim());
+      // Capture simulated OTP for demonstration / testing ease
+      if (res && res.otp) {
+        setTestingOtp(res.otp);
+        // Autofill for user convenience in testing
+        setOtp(res.otp);
+      }
+      setStep('otp');
     } catch (err) {
-      // AuthContext sets authError, which we display
+      // Error is stored globally in authError
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Register Submit
-  const handleRegisterSubmit = async (e) => {
+  // Phase 2: Verify OTP
+  const handleVerifyOtpSubmit = async (e) => {
     e.preventDefault();
     setValidationError('');
 
-    if (!regName || !regEmail || !regPassword || !regConfirmPassword) {
-      setValidationError('Please fill in all required fields.');
-      return;
-    }
-
-    if (regPassword !== regConfirmPassword) {
-      setValidationError('Passwords do not match.');
-      return;
-    }
-
-    if (!agreeTerms) {
-      setValidationError('You must agree to the Terms & Conditions and Privacy Policy.');
+    if (!otp || otp.length !== 6) {
+      setValidationError('Please enter the 6-digit OTP code.');
       return;
     }
 
     setLoading(true);
     try {
-      await register(regName, regEmail, regPassword);
-      navigate(redirect);
+      const data = await verifyOtp(phone.trim(), otp.trim());
+      if (data.isNewUser) {
+        navigate(`/complete-profile?redirect=${encodeURIComponent(redirect)}`);
+      } else {
+        navigate(redirect);
+      }
     } catch (err) {
-      // AuthContext sets authError, which we display
+      // Error is stored globally in authError
     } finally {
       setLoading(false);
     }
   };
 
-  // Social Login Handler (e.g. Google OAuth redirect)
   const handleGoogleLogin = () => {
     window.location.href = '/api/auth/google';
   };
 
-  const handleMockSocialLogin = (platform) => {
-    alert(`${platform} integration is coming soon! Please use email login or Google OAuth.`);
-  };
-
-  const toggleView = () => {
-    setIsLogin(!isLogin);
+  const handleBackToPhone = () => {
+    setStep('phone');
+    setOtp('');
+    setTestingOtp('');
     setValidationError('');
   };
 
@@ -148,26 +142,43 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Render LOGIN view */}
-        {isLogin ? (
+        {step === 'phone' ? (
+          /* Step 1: Input Phone Number */
           <div className="auth-panel fade-in">
             <div className="auth-header">
-              <h1 className="auth-title">WELCOME BACK</h1>
-              <p className="auth-subtitle">Login to continue to Unicorn</p>
+              <h1 className="auth-title">WELCOME TO UNICORN</h1>
+              <p className="auth-subtitle">Enter phone number to login or register</p>
             </div>
 
-            {/* Social Logins */}
-            <div className="social-buttons-grid">
-              <button type="button" className="social-btn google-btn" onClick={handleGoogleLogin}>
-                <span className="social-logo-g">G</span> Google
+            {/* Error Message banner */}
+            {(validationError || authError) && (
+              <div className="auth-error-banner">
+                <FiAlertCircle size={16} />
+                <span>{validationError || authError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSendOtpSubmit} className="auth-form">
+              <div className="form-group-custom">
+                <label className="form-label-custom">Phone Number *</label>
+                <div className="input-with-icon-wrapper">
+                  <FiPhone className="input-icon-prefix" />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter your 10-digit number"
+                    className="auth-input-field"
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="auth-submit-btn-gold" disabled={loading}>
+                {loading ? 'REQUESTING OTP...' : 'CONTINUE'} <FiArrowRight className="btn-arrow-icon" />
               </button>
-              <button type="button" className="social-btn github-btn" onClick={() => handleMockSocialLogin('GitHub')}>
-                <span className="social-logo-git">git</span> GitHub
-              </button>
-              <button type="button" className="social-btn apple-btn" onClick={() => handleMockSocialLogin('Apple')}>
-                <span className="social-logo-apple"></span> Apple
-              </button>
-            </div>
+            </form>
 
             <div className="auth-divider">
               <span className="divider-line"></span>
@@ -175,90 +186,22 @@ const Login = () => {
               <span className="divider-line"></span>
             </div>
 
-            {/* Error Message banner */}
-            {(validationError || authError) && (
-              <div className="auth-error-banner">
-                <FiAlertCircle size={16} />
-                <span>{validationError || authError}</span>
-              </div>
-            )}
-
-            {/* Login Form */}
-            <form onSubmit={handleLoginSubmit} className="auth-form">
-              <div className="form-group-custom">
-                <label className="form-label-custom">Email or Phone *</label>
-                <div className="input-with-icon-wrapper">
-                  <FiUser className="input-icon-prefix" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="auth-input-field"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group-custom">
-                <label className="form-label-custom">Password *</label>
-                <div className="input-with-icon-wrapper">
-                  <FiLock className="input-icon-prefix" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="auth-input-field"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-meta-row">
-                <label className="checkbox-container-custom">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="checkbox-input-custom"
-                  />
-                  <span className="checkbox-label-text">Remember me</span>
-                </label>
-                <button
-                  type="button"
-                  className="forgot-password-link"
-                  onClick={() => alert('Password reset link has been sent to your email (mocked).')}
-                >
-                  Forgot Password?
-                </button>
-              </div>
-
-              <button type="submit" className="auth-submit-btn-gold" disabled={loading}>
-                {loading ? 'LOGGING IN...' : 'LOGIN'} <FiArrowRight className="btn-arrow-icon" />
-              </button>
-            </form>
-
-            <div className="auth-footer">
-              <span className="footer-prompt">Don't have an account?</span>
-              <button type="button" className="footer-toggle-btn" onClick={toggleView}>
-                Register
+            {/* Social Google Logins as alternate option */}
+            <div className="social-buttons-grid" style={{ gridTemplateColumns: '1fr' }}>
+              <button type="button" className="social-btn google-btn" onClick={handleGoogleLogin}>
+                <span className="social-logo-g" style={{ marginRight: '8px' }}>G</span> Sign in with Google
               </button>
             </div>
           </div>
         ) : (
-          /* Render REGISTER / CREATE ACCOUNT view */
+          /* Step 2: Input OTP Verification */
           <div className="auth-panel fade-in">
             <div className="auth-header">
-              <h1 className="auth-title">CREATE ACCOUNT</h1>
-              <p className="auth-subtitle">Join Unicorn and explore the darkness</p>
+              <button type="button" className="password-toggle-btn" style={{ left: '0', right: 'auto', top: '5px' }} onClick={handleBackToPhone}>
+                <FiArrowLeft size={20} />
+              </button>
+              <h1 className="auth-title">VERIFY OTP</h1>
+              <p className="auth-subtitle">Enter the 6-digit code sent to {phone}</p>
             </div>
 
             {/* Error Message banner */}
@@ -269,120 +212,53 @@ const Login = () => {
               </div>
             )}
 
-            {/* Registration Form */}
-            <form onSubmit={handleRegisterSubmit} className="auth-form">
+            <form onSubmit={handleVerifyOtpSubmit} className="auth-form">
               <div className="form-group-custom">
-                <label className="form-label-custom">Full Name *</label>
+                <label className="form-label-custom">Verification Code (OTP) *</label>
                 <div className="input-with-icon-wrapper">
-                  <FiUser className="input-icon-prefix" />
+                  <FiLock className="input-icon-prefix" />
                   <input
                     type="text"
-                    value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
-                    placeholder="Enter your full name"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter 6-digit OTP"
+                    maxLength={6}
                     className="auth-input-field"
                     required
+                    autoFocus
                   />
                 </div>
               </div>
 
-              <div className="form-group-custom">
-                <label className="form-label-custom">Email Address *</label>
-                <div className="input-with-icon-wrapper">
-                  <FiMail className="input-icon-prefix" />
-                  <input
-                    type="email"
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    className="auth-input-field"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group-custom">
-                <label className="form-label-custom">Phone Number (Optional)</label>
-                <div className="input-with-icon-wrapper">
-                  <FiPhone className="input-icon-prefix" />
-                  <input
-                    type="tel"
-                    value={regPhone}
-                    onChange={(e) => setRegPhone(e.target.value)}
-                    placeholder="Enter your phone number"
-                    className="auth-input-field"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group-custom">
-                <label className="form-label-custom">Password *</label>
-                <div className="input-with-icon-wrapper">
-                  <FiLock className="input-icon-prefix" />
-                  <input
-                    type={showRegPassword ? 'text' : 'password'}
-                    value={regPassword}
-                    onChange={(e) => setRegPassword(e.target.value)}
-                    placeholder="Create a password"
-                    className="auth-input-field"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowRegPassword(!showRegPassword)}
-                  >
-                    {showRegPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-group-custom">
-                <label className="form-label-custom">Confirm Password *</label>
-                <div className="input-with-icon-wrapper">
-                  <FiLock className="input-icon-prefix" />
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={regConfirmPassword}
-                    onChange={(e) => setRegConfirmPassword(e.target.value)}
-                    placeholder="Confirm your password"
-                    className="auth-input-field"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-meta-row">
-                <label className="checkbox-container-custom">
-                  <input
-                    type="checkbox"
-                    checked={agreeTerms}
-                    onChange={(e) => setAgreeTerms(e.target.checked)}
-                    className="checkbox-input-custom"
-                    required
-                  />
-                  <span className="checkbox-label-text terms-label-text">
-                    I agree to the <a href="/terms" onClick={(e) => e.stopPropagation()}>Terms & Conditions</a> and <a href="/privacy" onClick={(e) => e.stopPropagation()}>Privacy Policy</a>
-                  </span>
-                </label>
-              </div>
-
-              <button type="submit" className="auth-submit-btn-outline" disabled={loading}>
-                {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'} <FiArrowRight className="btn-arrow-icon" />
+              <button type="submit" className="auth-submit-btn-gold" disabled={loading}>
+                {loading ? 'VERIFYING...' : 'VERIFY & SIGN IN'} <FiArrowRight className="btn-arrow-icon" />
               </button>
             </form>
 
-            <div className="auth-footer">
-              <span className="footer-prompt">Already have an account?</span>
-              <button type="button" className="footer-toggle-btn" onClick={toggleView}>
-                Login
+            {/* Test Helper displaying generated OTP code */}
+            {testingOtp && (
+              <div className="auth-test-otp-helper" style={{
+                marginTop: '1.25rem',
+                padding: '0.85rem',
+                background: 'rgba(212, 163, 89, 0.06)',
+                border: '1px dashed rgba(212, 163, 89, 0.3)',
+                borderRadius: '8px',
+                color: 'var(--white)',
+                fontSize: '0.8rem',
+                textAlign: 'center'
+              }}>
+                <span style={{ color: '#d4a359', fontWeight: 600 }}>Test OTP Code: </span>
+                <strong style={{ letterSpacing: '2px', fontSize: '0.9rem' }}>{testingOtp}</strong>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.7rem', color: 'var(--gray-500)' }}>
+                  (Autofilled for your testing convenience)
+                </p>
+              </div>
+            )}
+            
+            <div className="auth-footer" style={{ marginTop: '1.5rem' }}>
+              <span className="footer-prompt">Didn't receive code?</span>
+              <button type="button" className="footer-toggle-btn" onClick={handleSendOtpSubmit} disabled={loading}>
+                Resend OTP
               </button>
             </div>
           </div>

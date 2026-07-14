@@ -77,6 +77,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const sendOtp = async (phone) => {
+    setError(null);
+    try {
+      const { data } = await api.post('/auth/otp/send', { phone });
+      return data;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to send OTP. Please try again.';
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
+  const verifyOtp = async (phone, otp) => {
+    setError(null);
+    try {
+      const { data } = await api.post('/auth/otp/verify', { phone, otp });
+      setUser(data);
+      return data;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Invalid or expired OTP. Please try again.';
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -86,6 +111,8 @@ export const AuthProvider = ({ children }) => {
       register,
       logout,
       updateProfile,
+      sendOtp,
+      verifyOtp,
       api
     }}>
       {children}

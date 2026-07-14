@@ -2,10 +2,13 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String }, // Optional for OAuth users
+  name: { type: String, default: 'User' },
+  email: { type: String, unique: true, sparse: true },
+  phone: { type: String, unique: true, sparse: true },
+  password: { type: String }, // Optional for OAuth / OTP users
   googleId: { type: String }, // For Google OAuth
+  otp: { type: String },
+  otpExpires: { type: Date },
   isAdmin: { type: Boolean, required: true, default: false }
 }, {
   timestamps: true

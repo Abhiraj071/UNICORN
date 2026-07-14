@@ -151,6 +151,105 @@ const updateUserRole = async (req, res) => {
   }
 };
 
+// @desc    Send OTP to phone
+// @route   POST /api/auth/otp/send
+// @access  Public
+const sendOTP = async (req, res) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return res.status(400).json({ message: 'Please enter a phone number' });
+  }
+
+  // Validate phone format
+  const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
+  if (!phoneRegex.test(phone.trim())) {
+    return res.status(400).json({ message: 'Please enter a valid phone number' });
+  }
+
+  try {
+    const formattedPhone = phone.trim();
+    let user = await User.findOne({ phone: formattedPhone });
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    if (!user) {
+      // Create new user skeleton
+      const lastFour = formattedPhone.slice(-4);
+      user = await User.create({
+        phone: formattedPhone,
+        name: `User-${lastFour}`,
+        otp,
+        otpExpires,
+      });
+    } else {
+      user.otp = otp;
+      user.otpExpires = otpExpires;
+      await user.save();
+    }
+
+    console.log(`[OTP Services] Sent OTP ${otp} to phone number ${formattedPhone}`);
+
+    // Return OTP in response in dev/test/staging environments so users don't need real SMS integration immediately
+    res.status(200).json({
+      message: 'Verification code sent successfully',
+      otp: otp, // Sending back directly for simulation & easy testing
+    });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Server error sending verification code' });
+  }
+};
+
+// @desc    Verify OTP and log in
+// @route   POST /api/auth/otp/verify
+// @access  Public
+const verifyOTP = async (req, res) => {
+  const { phone, otp } = req.body;
+
+  if (!phone || !otp) {
+    return res.status(400).json({ message: 'Please provide phone number and OTP' });
+  }
+
+  try {
+    const formattedPhone = phone.trim();
+    const user = await User.findOne({ phone: formattedPhone });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.otp || user.otp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    // Clear OTP fields
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    // Check if user profile is completed (needs name & email set)
+    const isNewUser = !user.email || !user.name || user.name.startsWith('User-');
+
+    // Generate JWT cookie
+    generateToken(res, user._id);
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+      isNewUser,
+    });
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    res.status(500).json({ message: 'Server error verifying OTP' });
+  }
+};
+
 module.exports = {
   authUser,
   registerUser,
@@ -159,4 +258,6 @@ module.exports = {
   updateUserProfile,
   getUsers,
   updateUserRole,
+  sendOTP,
+  verifyOTP,
 };

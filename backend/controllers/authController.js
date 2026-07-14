@@ -175,6 +175,24 @@ const sendOTP = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
+    // Twilio SMS Integration
+    let smsSent = false;
+    if (process.env.TWILIO_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+      try {
+        const twilio = require('twilio');
+        const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+        await client.messages.create({
+          body: `Your UNICORN verification code is: ${otp}. It will expire in 5 minutes.`,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: formattedPhone,
+        });
+        smsSent = true;
+        console.log(`[Twilio SMS] Sent OTP code successfully to ${formattedPhone}`);
+      } catch (err) {
+        console.error('Twilio SMS delivery failed, falling back to console log:', err);
+      }
+    }
+
     if (!user) {
       // Create new user skeleton
       const lastFour = formattedPhone.slice(-4);
@@ -192,10 +210,9 @@ const sendOTP = async (req, res) => {
 
     console.log(`[OTP Services] Sent OTP ${otp} to phone number ${formattedPhone}`);
 
-    // Return OTP in response in dev/test/staging environments so users don't need real SMS integration immediately
     res.status(200).json({
-      message: 'Verification code sent successfully',
-      otp: otp, // Sending back directly for simulation & easy testing
+      message: smsSent ? 'Verification code sent via SMS successfully' : 'Verification code sent successfully (simulated)',
+      otp: smsSent ? undefined : otp, // Expose OTP only if NOT sent via SMS
     });
   } catch (error) {
     console.error('Error sending OTP:', error);

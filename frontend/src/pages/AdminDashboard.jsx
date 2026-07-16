@@ -37,7 +37,8 @@ import {
   FiChevronRight,
   FiMoreVertical,
   FiEye,
-  FiRefreshCw
+  FiRefreshCw,
+  FiMenu
 } from 'react-icons/fi';
 import './AdminDashboard.css';
 
@@ -47,6 +48,7 @@ const AdminDashboard = () => {
   
   // Navigation states
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'products', 'orders', 'customers', 'inventory', 'coupons', 'reviews', 'lookbook', 'limited-drops', 'cms', 'faq', 'tickets', 'employees', 'roles', 'settings'
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Data states
   const [products, setProducts] = useState([]);
@@ -1151,8 +1153,12 @@ const AdminDashboard = () => {
       {/* Main Grid Layout */}
       <div className="gothic-dashboard-container">
         
+        {sidebarOpen && (
+          <div className="sidebar-mobile-overlay" onClick={() => setSidebarOpen(false)}></div>
+        )}
+        
         {/* Sidebar Nav */}
-        <aside className="gothic-sidebar-panel">
+        <aside className={`gothic-sidebar-panel ${sidebarOpen ? 'open' : ''}`}>
           
           {/* Logo Brand Brand */}
           <div className="sidebar-logo-brand-block">
@@ -1163,9 +1169,16 @@ const AdminDashboard = () => {
               <span className="brand-primary-name">UNICORN</span>
               <span className="brand-secondary-sub">ADMIN PANEL</span>
             </div>
+            <button className="sidebar-close-btn-mobile" onClick={() => setSidebarOpen(false)}>
+              <FiX size={20} />
+            </button>
           </div>
 
-          <div className="sidebar-scrollable-links">
+          <div className="sidebar-scrollable-links" onClick={(e) => {
+            if (e.target.closest('button')) {
+              setSidebarOpen(false);
+            }
+          }}>
             
             {/* Dashboard active category */}
             <button 
@@ -1323,6 +1336,9 @@ const AdminDashboard = () => {
           
           {/* GLOBAL BREADCRUMBS & SAAS HEADER */}
           <header className="dashboard-top-header">
+            <button className="mobile-sidebar-toggle-btn" onClick={() => setSidebarOpen(true)} title="Open Navigation Menu">
+              <FiMenu size={20} />
+            </button>
             <div className="header-left-breadcrumbs">
               <div className="breadcrumb-path">
                 <span className="breadcrumb-parent">Dashboard</span>

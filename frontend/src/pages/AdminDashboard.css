@@ -2557,6 +2557,8 @@ input[type="file"].gothic-input::file-selector-button:hover {
   .gothic-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
 @media (max-width: 1024px) {
   .tab-layout-with-form-aside {
     flex-direction: column;
@@ -2575,10 +2577,77 @@ input[type="file"].gothic-input::file-selector-button:hover {
   }
 }
 
+/* Mobile Admin Navigation Drawer styling */
+.mobile-sidebar-toggle-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.mobile-sidebar-toggle-btn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.sidebar-close-btn-mobile {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: var(--transition-smooth);
+}
+
+.sidebar-close-btn-mobile:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.sidebar-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+  z-index: 240;
+}
+
 @media (max-width: 768px) {
-  /* Hide sidebar on mobile */
+  /* Show menu buttons */
+  .mobile-sidebar-toggle-btn {
+    display: flex;
+  }
+  
+  .sidebar-close-btn-mobile {
+    display: flex;
+  }
+
+  /* Transform sidebar into a mobile drawer */
   .gothic-sidebar-panel {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 250;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    border-right: 1px solid var(--border-color);
+  }
+
+  .gothic-sidebar-panel.open {
+    transform: translateX(0);
   }
 
   /* Dashboard main content padding */
@@ -2586,11 +2655,20 @@ input[type="file"].gothic-input::file-selector-button:hover {
     padding: 1.25rem 0.85rem;
   }
 
-  /* Header row */
+  /* Header row style adjustments to show menu button next to breadcrumbs */
   .dashboard-top-header {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .header-left-breadcrumbs {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    flex: 1;
   }
   .header-right-actions {
     width: 100%;

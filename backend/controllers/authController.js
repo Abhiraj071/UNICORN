@@ -21,6 +21,63 @@ const authUser = async (req, res) => {
   const user = await User.findOne(query);
 
   if (user && (await user.matchPassword(password))) {
+    if (user.isVerified === false) {
+      // Re-generate OTP and send verification email
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.otp = otp;
+      user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+
+      let otpSent = false;
+      if (user.email && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        try {
+          const nodemailer = require('nodemailer');
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+          });
+
+          const mailOptions = {
+            from: `"UNICORN Store" <${process.env.SMTP_USER}>`,
+            to: user.email,
+            subject: 'Verify Your UNICORN Account',
+            text: `Your account verification code is: ${otp}. It will expire in 10 minutes.`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #d4a359; text-align: center;">UNICORN STORE</h2>
+                <p>Hello ${user.name},</p>
+                <p>Please verify your email using the following one-time verification code:</p>
+                <div style="font-size: 24px; font-weight: bold; letter-spacing: 4px; text-align: center; margin: 20px 0; padding: 10px; background-color: #f9f9f9; color: #111; border-radius: 5px;">
+                  ${otp}
+                </div>
+                <p>This code will expire in 10 minutes.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin-top: 20px;" />
+                <p style="font-size: 11px; color: #999; text-align: center;">This is an automated verification email. Please do not reply.</p>
+              </div>
+            `,
+          };
+
+          await transporter.sendMail(mailOptions);
+          otpSent = true;
+          console.log(`[Unverified Login OTP] Re-sent verification code successfully to ${user.email}`);
+        } catch (err) {
+          console.error('Nodemailer failed:', err);
+        }
+      }
+
+      return res.status(401).json({
+        message: 'Your email address is not verified. A verification code has been sent to your email.',
+        unverified: true,
+        email: user.email,
+        otp: otpSent ? undefined : otp
+      });
+    }
+
     generateToken(res, user._id);
     res.json({
       _id: user._id,
@@ -34,35 +91,96 @@ const authUser = async (req, res) => {
   }
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
-  const userExists = await User.findOne({ email });
-
-  if (userExists) {
-    res.status(400).json({ message: 'User already exists' });
-    return;
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'Please fill in all required fields' });
   }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-  });
+  try {
+    const formattedEmail = email.trim().toLowerCase();
+    let user = await User.findOne({ email: formattedEmail });
 
-  if (user) {
-    generateToken(res, user._id);
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
+    if (user && user.isVerified !== false) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    if (user) {
+      // Unverified user already exists, update details and re-send OTP
+      user.name = name.trim();
+      user.password = password;
+      user.otp = otp;
+      user.otpExpires = otpExpires;
+      await user.save();
+    } else {
+      // Create new unverified user
+      user = await User.create({
+        name: name.trim(),
+        email: formattedEmail,
+        password,
+        otp,
+        otpExpires,
+        isVerified: false
+      });
+    }
+
+    let otpSent = false;
+
+    // Send verification email
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST || 'smtp.gmail.com',
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        });
+
+        const mailOptions = {
+          from: `"UNICORN Store" <${process.env.SMTP_USER}>`,
+          to: formattedEmail,
+          subject: 'Verify Your UNICORN Account',
+          text: `Your account verification code is: ${otp}. It will expire in 10 minutes.`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+              <h2 style="color: #d4a359; text-align: center;">UNICORN STORE</h2>
+              <p>Hello ${name.trim()},</p>
+              <p>Thank you for registering. Please verify your email using the following one-time verification code:</p>
+              <div style="font-size: 24px; font-weight: bold; letter-spacing: 4px; text-align: center; margin: 20px 0; padding: 10px; background-color: #f9f9f9; color: #111; border-radius: 5px;">
+                ${otp}
+              </div>
+              <p>This code will expire in 10 minutes.</p>
+              <hr style="border: none; border-top: 1px solid #eee; margin-top: 20px;" />
+              <p style="font-size: 11px; color: #999; text-align: center;">This is an automated verification email. Please do not reply.</p>
+            </div>
+          `,
+        };
+
+        await transporter.sendMail(mailOptions);
+        otpSent = true;
+        console.log(`[Register Verification OTP] Sent successfully to ${formattedEmail}`);
+      } catch (err) {
+        console.error('Nodemailer registration email failed:', err);
+      }
+    }
+
+    res.status(200).json({
+      message: otpSent 
+        ? 'Verification code sent to your email.' 
+        : 'Verification code generated (simulated)',
+      otp: otpSent ? undefined : otp
     });
-  } else {
-    res.status(400).json({ message: 'Invalid user data' });
+  } catch (error) {
+    console.error('Register user error:', error);
+    res.status(500).json({ message: 'Server error during registration' });
   }
 };
 
@@ -506,6 +624,54 @@ const forgotPasswordReset = async (req, res) => {
   }
 };
 
+// @desc    Verify Registration Email OTP
+// @route   POST /api/auth/register/verify
+// @access  Public
+const verifyRegisterOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({ message: 'Please provide email and verification code' });
+  }
+
+  try {
+    const formattedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: formattedEmail });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isVerified !== false) {
+      return res.status(400).json({ message: 'Email already verified' });
+    }
+
+    if (!user.otp || user.otp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: 'Invalid or expired verification code' });
+    }
+
+    // Mark as verified and clear OTP
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    // Generate JWT cookie
+    generateToken(res, user._id);
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+    });
+  } catch (error) {
+    console.error('Verify register OTP error:', error);
+    res.status(500).json({ message: 'Server error verifying email' });
+  }
+};
+
 module.exports = {
   authUser,
   registerUser,
@@ -518,4 +684,5 @@ module.exports = {
   verifyOTP,
   forgotPasswordSendOTP,
   forgotPasswordReset,
+  verifyRegisterOTP,
 };

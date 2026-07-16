@@ -38,7 +38,14 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       const message = err.response?.data?.message || 'Login failed. Please try again.';
       setError(message);
-      throw new Error(message);
+      
+      const customError = new Error(message);
+      if (err.response?.data?.unverified) {
+        customError.unverified = true;
+        customError.email = err.response.data.email;
+        customError.otp = err.response.data.otp;
+      }
+      throw customError;
     }
   };
 
@@ -46,7 +53,6 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const { data } = await api.post('/auth/register', { name, email, password });
-      setUser(data);
       return data;
     } catch (err) {
       const message = err.response?.data?.message || 'Registration failed. Please try again.';
@@ -126,6 +132,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const verifyRegisterOtp = async (email, otp) => {
+    setError(null);
+    try {
+      const { data } = await api.post('/auth/register/verify', { email, otp });
+      setUser(data);
+      return data;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Email verification failed.';
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -139,6 +158,7 @@ export const AuthProvider = ({ children }) => {
       verifyOtp,
       forgotPasswordSendOtp,
       forgotPasswordReset,
+      verifyRegisterOtp,
       api
     }}>
       {children}

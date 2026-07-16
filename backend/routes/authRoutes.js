@@ -14,10 +14,12 @@ const {
   verifyOTP,
   forgotPasswordSendOTP,
   forgotPasswordReset,
+  verifyRegisterOTP,
 } = require('../controllers/authController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
+router.post('/register/verify', verifyRegisterOTP);
 router.post('/login', authUser);
 router.post('/logout', logoutUser);
 router.post('/forgot-password/send', forgotPasswordSendOTP);

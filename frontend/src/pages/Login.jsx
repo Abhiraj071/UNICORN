@@ -26,6 +26,7 @@ const Login = () => {
     register, 
     forgotPasswordSendOtp,
     forgotPasswordReset,
+    verifyRegisterOtp,
     error: authError 
   } = useAuth();
 
@@ -55,6 +56,12 @@ const Login = () => {
   const [forgotTestingOtp, setForgotTestingOtp] = useState('');
   const [forgotShowPassword, setForgotShowPassword] = useState(false);
   const [forgotShowConfirmPassword, setForgotShowConfirmPassword] = useState(false);
+
+  // Registration Verification Wizard states
+  const [isRegisterVerifying, setIsRegisterVerifying] = useState(false);
+  const [regVerifyEmail, setRegVerifyEmail] = useState('');
+  const [regVerifyOtp, setRegVerifyOtp] = useState('');
+  const [regTestingOtp, setRegTestingOtp] = useState('');
 
   // UI state
   const [validationError, setValidationError] = useState('');
@@ -106,7 +113,15 @@ const Login = () => {
       await login(emailOrPhone.trim(), loginPassword);
       navigate(redirect);
     } catch (err) {
-      // Auth error is captured in authError context
+      if (err.unverified) {
+        setRegVerifyEmail(err.email);
+        if (err.otp) {
+          setRegTestingOtp(err.otp);
+          setRegVerifyOtp(err.otp);
+        }
+        setIsRegisterVerifying(true);
+        setSuccessMessage('Please verify your email address first.');
+      }
     } finally {
       setLoading(false);
     }
@@ -140,13 +155,52 @@ const Login = () => {
 
     setLoading(true);
     try {
-      await register(regName.trim(), regEmail.trim(), regPassword);
-      navigate(redirect);
+      const res = await register(regName.trim(), regEmail.trim(), regPassword);
+      setRegVerifyEmail(regEmail.trim());
+      if (res && res.otp) {
+        setRegTestingOtp(res.otp);
+        setRegVerifyOtp(res.otp);
+      }
+      setIsRegisterVerifying(true);
+      setSuccessMessage('Registration initiated! Verification code sent to your email.');
     } catch (err) {
-      // Auth error is captured in authError context
+      // Error handled by AuthContext
     } finally {
       setLoading(false);
     }
+  };
+
+  // 2.1. Register Verify OTP Submit
+  const handleRegisterVerifySubmit = async (e) => {
+    e.preventDefault();
+    setValidationError('');
+    setSuccessMessage('');
+
+    if (!regVerifyOtp || regVerifyOtp.trim().length !== 6) {
+      setValidationError('Please enter the 6-digit verification code.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await verifyRegisterOtp(regVerifyEmail, regVerifyOtp.trim());
+      setIsRegisterVerifying(false);
+      setSuccessMessage('Email verified successfully! Logging in.');
+      navigate(redirect);
+    } catch (err) {
+      setValidationError(err.message || 'Verification failed. Please check the code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelRegisterVerify = () => {
+    setIsRegisterVerifying(false);
+    setRegVerifyEmail('');
+    setRegVerifyOtp('');
+    setRegTestingOtp('');
+    setValidationError('');
+    setSuccessMessage('');
   };
 
   // 3. Forgot Password Send OTP
@@ -265,8 +319,8 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Tab Navigation Menu (Hidden during Forgot Password wizard) */}
-        {forgotStep === null && (
+        {/* Tab Navigation Menu (Hidden during Forgot Password/Verification wizards) */}
+        {forgotStep === null && !isRegisterVerifying && (
           <div className="auth-tab-menu" style={{
             display: 'flex',
             justifyContent: 'space-around',
@@ -334,7 +388,7 @@ const Login = () => {
         )}
 
         {/* --- STANDARD PASSWORD LOGIN --- */}
-        {forgotStep === null && activeTab === 'login' && (
+        {forgotStep === null && !isRegisterVerifying && activeTab === 'login' && (
           <div className="auth-panel fade-in">
             <div className="auth-header">
               <h1 className="auth-title">PASSWORD LOGIN</h1>
@@ -404,7 +458,7 @@ const Login = () => {
         )}
 
         {/* --- STANDARD SIGN UP --- */}
-        {forgotStep === null && activeTab === 'register' && (
+        {forgotStep === null && !isRegisterVerifying && activeTab === 'register' && (
           <div className="auth-panel fade-in">
             <div className="auth-header">
               <h1 className="auth-title">CREATE ACCOUNT</h1>
@@ -505,6 +559,61 @@ const Login = () => {
                 {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'} <FiArrowRight className="btn-arrow-icon" />
               </button>
             </form>
+          </div>
+        )}
+
+        {/* --- REGISTRATION VERIFY OTP SCREEN --- */}
+        {isRegisterVerifying && (
+          <div className="auth-panel fade-in">
+            <div className="auth-header">
+              <button type="button" className="password-toggle-btn" style={{ left: '0', right: 'auto', top: '5px' }} onClick={cancelRegisterVerify}>
+                <FiArrowLeft size={20} />
+              </button>
+              <h1 className="auth-title" style={{ fontSize: '1.2rem' }}>VERIFY YOUR EMAIL</h1>
+              <p className="auth-subtitle">Type the 6-digit verification code sent to <strong>{regVerifyEmail}</strong></p>
+            </div>
+
+            <form onSubmit={handleRegisterVerifySubmit} className="auth-form">
+              <div className="form-group-custom">
+                <label className="form-label-custom">Verification Code *</label>
+                <div className="input-with-icon-wrapper">
+                  <FiLock className="input-icon-prefix" />
+                  <input
+                    type="text"
+                    value={regVerifyOtp}
+                    onChange={(e) => setRegVerifyOtp(e.target.value)}
+                    placeholder="Enter 6-digit code"
+                    maxLength={6}
+                    className="auth-input-field"
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="auth-submit-btn-gold" disabled={loading}>
+                {loading ? 'VERIFYING...' : 'VERIFY EMAIL'} <FiArrowRight className="btn-arrow-icon" />
+              </button>
+            </form>
+
+            {regTestingOtp && (
+              <div className="auth-test-otp-helper" style={{
+                marginTop: '1.25rem',
+                padding: '0.85rem',
+                background: 'rgba(212, 163, 89, 0.06)',
+                border: '1px dashed rgba(212, 163, 89, 0.3)',
+                borderRadius: '8px',
+                color: 'var(--white)',
+                fontSize: '0.8rem',
+                textAlign: 'center'
+              }}>
+                <span style={{ color: '#d4a359', fontWeight: 600 }}>Test Registration OTP: </span>
+                <strong style={{ letterSpacing: '2px', fontSize: '0.9rem' }}>{regTestingOtp}</strong>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.7rem', color: 'var(--gray-500)' }}>
+                  (Autofilled for your testing convenience)
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -662,7 +771,7 @@ const Login = () => {
         )}
 
         {/* --- DYNAMIC BOTTOM GOOGLE OAUTH LOGIN PANEL --- */}
-        {forgotStep === null && (
+        {forgotStep === null && !isRegisterVerifying && (
           <>
             <div className="auth-divider">
               <span className="divider-line"></span>

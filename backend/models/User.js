@@ -9,7 +9,8 @@ const userSchema = new mongoose.Schema({
   googleId: { type: String }, // For Google OAuth
   otp: { type: String },
   otpExpires: { type: Date },
-  isAdmin: { type: Boolean, required: true, default: false }
+  isAdmin: { type: Boolean, required: true, default: false },
+  isVerified: { type: Boolean, required: true, default: false }
 }, {
   timestamps: true
 });

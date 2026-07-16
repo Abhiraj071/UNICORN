@@ -411,7 +411,7 @@ const Login = () => {
               <p className="auth-subtitle">Create a secure password-based profile</p>
             </div>
 
-            <form onSubmit={handleRegisterSubmit} className="auth-form" style={{ maxHeight: '46vh' }}>
+            <form onSubmit={handleRegisterSubmit} className="auth-form" style={{ maxHeight: '42vh' }}>
               <div className="form-group-custom">
                 <label className="form-label-custom">Full Name *</label>
                 <div className="input-with-icon-wrapper">

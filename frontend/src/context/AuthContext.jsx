@@ -27,6 +27,13 @@ export const AuthProvider = ({ children }) => {
       }
     };
     checkAuth();
+
+    // Keep-alive ping every 14 minutes to prevent Render free tier cold starts
+    const keepAlive = setInterval(() => {
+      api.get('/health').catch(() => {});
+    }, 14 * 60 * 1000);
+
+    return () => clearInterval(keepAlive);
   }, []);
 
   const login = async (emailOrPhone, password) => {

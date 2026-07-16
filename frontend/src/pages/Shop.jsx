@@ -99,6 +99,7 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState('Featured');
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [wishlist, setWishlist] = useState([]);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // URL/Param filter states
   const [limitedOnly, setLimitedOnly] = useState(initialFilters.limitedOnly);
@@ -394,19 +395,79 @@ const Shop = () => {
             </div>
           </aside>
 
+          {/* Mobile Filter Drawer Overlay */}
+          {mobileFiltersOpen && (
+            <div className="mobile-filter-overlay" onClick={() => setMobileFiltersOpen(false)} />
+          )}
+          <aside className={`mobile-filter-drawer ${mobileFiltersOpen ? 'open' : ''}`}>
+            <div className="mobile-filter-drawer-header">
+              <h3 className="sidebar-title"><FiSliders className="sidebar-icon" /> FILTERS</h3>
+              <button className="mobile-drawer-close-btn" onClick={() => setMobileFiltersOpen(false)}><FiX size={22} /></button>
+            </div>
+            <div className="mobile-filter-drawer-body">
+              <div className="filter-group">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--divider-color)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+                  <h4 className="filter-group-title" style={{ border: 'none', paddingBottom: 0, marginBottom: 0 }}>CATEGORIES</h4>
+                  <button className="clear-filters-btn" onClick={clearAllFilters}>CLEAR ALL</button>
+                </div>
+                <ul className="filter-list">
+                  <li className={selectedCategory === 'All Products' ? 'active-filter' : ''} onClick={() => setSelectedCategory('All Products')}>
+                    <span className="filter-name">All Products</span>
+                    <span className="filter-count">{products.length}</span>
+                  </li>
+                  {categories.map(cat => (
+                    <li key={cat._id} className={selectedCategory === cat.name ? 'active-filter' : ''} onClick={() => setSelectedCategory(cat.name)}>
+                      <span className="filter-name">{cat.name}</span>
+                      <span className="filter-count">{categoryCounts[cat.name] || 0}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="filter-group">
+                <h4 className="filter-group-title">SIZE</h4>
+                <div className="size-checkboxes-list">
+                  {SIZES_LIST.map(size => (
+                    <label key={size} className="size-checkbox-label">
+                      <div className="checkbox-input-wrapper">
+                        <input type="checkbox" checked={selectedSizes.includes(size)} onChange={() => toggleSize(size)} />
+                        <span className="custom-checkbox"></span>
+                        <span className="size-name">{size}</span>
+                      </div>
+                      <span className="size-count">{sizeCounts[size] || 0}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-group">
+                <h4 className="filter-group-title">PRICE</h4>
+                <div className="price-slider-wrapper">
+                  <div className="price-labels">
+                    <span>₹499</span>
+                    <span>{formatPrice(maxPrice)}</span>
+                  </div>
+                  <input type="range" min="499" max={sliderMax} step="100" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="price-range-slider" />
+                </div>
+              </div>
+              <button className="apply-filters-btn" onClick={() => { applyFilters(); setMobileFiltersOpen(false); }}>APPLY FILTERS</button>
+            </div>
+          </aside>
+
           {/* Product Listing Area */}
           <div className="shop-content-area">
             
             {/* Top Toolbar */}
             <div className="shop-toolbar">
-              <div className="products-count-status">
-                {sortedProducts.length} PRODUCTS
+              <div className="toolbar-left">
+                <button className="mobile-filter-toggle-btn" onClick={() => setMobileFiltersOpen(true)}>
+                  <FiSliders size={16} /> FILTERS
+                </button>
+                <span className="products-count-status">{sortedProducts.length} PRODUCTS</span>
               </div>
               <div className="toolbar-controls-right">
                 <div className="sort-by-wrapper">
                   <span className="sort-label">SORT BY:</span>
-                  <select 
-                    value={sortBy} 
+                  <select
+                    value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="sort-dropdown"
                   >

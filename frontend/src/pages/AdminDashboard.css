@@ -2557,6 +2557,7 @@ input[type="file"].gothic-input::file-selector-button:hover {
   .gothic-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+@media (max-width: 1024px) {
   .tab-layout-with-form-aside {
     flex-direction: column;
     align-items: stretch;
@@ -2566,15 +2567,95 @@ input[type="file"].gothic-input::file-selector-button:hover {
     min-width: 100%;
     position: static;
   }
+  .overview-graphics-row {
+    grid-template-columns: 1fr;
+  }
+  .overview-graphics-row.alignment-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
+  /* Hide sidebar on mobile */
   .gothic-sidebar-panel {
-    display: none; /* Mobile Drawer menu should handle it */
+    display: none;
   }
+
+  /* Dashboard main content padding */
+  .gothic-content-view {
+    padding: 1.25rem 0.85rem;
+  }
+
+  /* Header row */
+  .dashboard-top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .header-right-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* KPI grid: 2 columns on mobile */
+  .gothic-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  /* Overview rows: stack everything */
+  .overview-graphics-row,
+  .overview-graphics-row.alignment-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Card headers: allow wrapping so title & button don't overlap */
+  .card-header-with-action {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-header-with-action h3 {
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .view-all-orders-text-btn,
+  .three-dots-btn {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  /* Orders table: scroll horizontally */
+  .gothic-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .gothic-dark-table {
+    min-width: 460px;
+  }
+  .gothic-dark-table th,
+  .gothic-dark-table td {
+    font-size: 0.72rem;
+    padding: 0.6rem 0.5rem;
+  }
+
+  /* Right column group: full width */
+  .graphics-card-group-column {
+    gap: 1rem;
+  }
+
+  /* Products analytics */
   .products-analytics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Sticky toolbar */
   .products-sticky-toolbar {
     flex-direction: column;
     align-items: stretch;
@@ -2584,32 +2665,41 @@ input[type="file"].gothic-input::file-selector-button:hover {
     margin-left: 0;
     justify-content: space-between;
   }
+
+  /* Expanded details */
   .expanded-details-layout {
     grid-template-columns: 1fr;
   }
-  .dashboard-top-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .header-right-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .gothic-content-view {
-    padding: 1.5rem 1rem;
+
+  /* Pagination */
+  .saas-pagination-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .products-analytics-grid {
-    grid-template-columns: 1fr;
-  }
+  /* KPI grid: 1 column on very small screens */
   .gothic-kpi-grid {
     grid-template-columns: 1fr;
   }
+
+  /* Products grid: 1 column */
+  .products-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Pagination stack */
   .saas-pagination-toolbar {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .gothic-content-view {
+    padding: 1rem 0.65rem;
+  }
+
+  .card-header-with-action h3 {
+    font-size: 0.82rem;
   }
 }

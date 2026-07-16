@@ -117,10 +117,6 @@ const Login = () => {
     } catch (err) {
       if (err.unverified) {
         setRegVerifyEmail(err.email);
-        if (err.otp) {
-          setRegTestingOtp(err.otp);
-          setRegVerifyOtp(err.otp);
-        }
         setIsRegisterVerifying(true);
         setSuccessMessage('Please verify your email address first.');
       }
@@ -157,12 +153,8 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await register(regName.trim(), regEmail.trim(), regPassword);
+      await register(regName.trim(), regEmail.trim(), regPassword);
       setRegVerifyEmail(regEmail.trim());
-      if (res && res.otp) {
-        setRegTestingOtp(res.otp);
-        setRegVerifyOtp(res.otp);
-      }
       setIsRegisterVerifying(true);
       setSuccessMessage('Registration initiated! Verification code sent to your email.');
     } catch (err) {
@@ -218,13 +210,9 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await forgotPasswordSendOtp(forgotPhoneOrEmail.trim());
-      if (res && res.otp) {
-        setForgotTestingOtp(res.otp);
-        setForgotOtp(res.otp); // autofill for convenient developer testing
-      }
+      await forgotPasswordSendOtp(forgotPhoneOrEmail.trim());
       setForgotStep('enter_otp');
-      setSuccessMessage('Verification code generated successfully.');
+      setSuccessMessage('Verification code sent to your email/phone.');
     } catch (err) {
       setValidationError(err.message || 'Error sending verification code.');
     } finally {

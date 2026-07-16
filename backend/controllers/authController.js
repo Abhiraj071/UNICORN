@@ -74,7 +74,6 @@ const authUser = async (req, res) => {
         message: 'Your email address is not verified. A verification code has been sent to your email.',
         unverified: true,
         email: user.email,
-        otp: otpSent ? undefined : otp
       });
     }
 
@@ -175,8 +174,7 @@ const registerUser = async (req, res) => {
     res.status(200).json({
       message: otpSent 
         ? 'Verification code sent to your email.' 
-        : 'Verification code generated (simulated)',
-      otp: otpSent ? undefined : otp
+        : 'Registration successful. Please check your email for the verification code.',
     });
   } catch (error) {
     console.error('Register user error:', error);

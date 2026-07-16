@@ -29,10 +29,10 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (emailOrPhone, password) => {
     setError(null);
     try {
-      const { data } = await api.post('/auth/login', { email, password });
+      const { data } = await api.post('/auth/login', { emailOrPhone, password });
       setUser(data);
       return data;
     } catch (err) {
@@ -102,6 +102,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const forgotPasswordSendOtp = async (phoneOrEmail) => {
+    setError(null);
+    try {
+      const { data } = await api.post('/auth/forgot-password/send', { phoneOrEmail });
+      return data;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to send verification code.';
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
+  const forgotPasswordReset = async (phoneOrEmail, otp, newPassword) => {
+    setError(null);
+    try {
+      const { data } = await api.post('/auth/forgot-password/reset', { phoneOrEmail, otp, newPassword });
+      return data;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to reset password.';
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -113,6 +137,8 @@ export const AuthProvider = ({ children }) => {
       updateProfile,
       sendOtp,
       verifyOtp,
+      forgotPasswordSendOtp,
+      forgotPasswordReset,
       api
     }}>
       {children}

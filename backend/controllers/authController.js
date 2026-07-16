@@ -1,13 +1,24 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
-// @desc    Auth user & get token
-// @route   POST /api/auth/login
-// @access  Public
 const authUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { emailOrPhone, password } = req.body;
 
-  const user = await User.findOne({ email });
+  if (!emailOrPhone || !password) {
+    return res.status(400).json({ message: 'Please provide email/phone and password' });
+  }
+
+  const input = emailOrPhone.trim();
+  const isEmail = input.includes('@');
+
+  let query = {};
+  if (isEmail) {
+    query = { email: input.toLowerCase() };
+  } else {
+    query = { phone: input };
+  }
+
+  const user = await User.findOne(query);
 
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user._id);
@@ -15,10 +26,11 @@ const authUser = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       isAdmin: user.isAdmin,
     });
   } else {
-    res.status(401).json({ message: 'Invalid email or password' });
+    res.status(401).json({ message: 'Invalid email/phone or password' });
   }
 };
 
@@ -336,6 +348,163 @@ const verifyOTP = async (req, res) => {
     res.status(500).json({ message: 'Server error verifying OTP' });
   }
 };
+// @desc    Send OTP for Forgot Password
+// @route   POST /api/auth/forgot-password/send
+// @access  Public
+const forgotPasswordSendOTP = async (req, res) => {
+  const { phoneOrEmail } = req.body;
+
+  if (!phoneOrEmail) {
+    return res.status(400).json({ message: 'Please enter your registered email or phone number' });
+  }
+
+  const input = phoneOrEmail.trim();
+  const isEmail = input.includes('@');
+
+  try {
+    let query = {};
+    let formattedPhone = '';
+    let formattedEmail = '';
+
+    if (isEmail) {
+      formattedEmail = input.toLowerCase();
+      query = { email: formattedEmail };
+    } else {
+      formattedPhone = input;
+      query = { phone: formattedPhone };
+    }
+
+    // Verify user exists in the database
+    let user = await User.findOne(query);
+    if (!user) {
+      return res.status(404).json({ message: 'No registered account found with this email or phone number.' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    let otpSent = false;
+
+    if (isEmail) {
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        try {
+          const nodemailer = require('nodemailer');
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+          });
+
+          const mailOptions = {
+            from: `"UNICORN Store" <${process.env.SMTP_USER}>`,
+            to: formattedEmail,
+            subject: 'UNICORN Password Reset Verification Code',
+            text: `Your password reset verification code is: ${otp}. It will expire in 5 minutes.`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #d4a359; text-align: center;">UNICORN STORE</h2>
+                <p>Hello,</p>
+                <p>You requested to reset your password. Your one-time verification code is:</p>
+                <div style="font-size: 24px; font-weight: bold; letter-spacing: 4px; text-align: center; margin: 20px 0; padding: 10px; background-color: #f9f9f9; color: #111; border-radius: 5px;">
+                  ${otp}
+                </div>
+                <p>This code will expire in 5 minutes.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin-top: 20px;" />
+                <p style="font-size: 11px; color: #999; text-align: center;">This is an automated security email. Please do not reply.</p>
+              </div>
+            `,
+          };
+
+          await transporter.sendMail(mailOptions);
+          otpSent = true;
+          console.log(`[Forgot Password OTP] Sent successfully to ${formattedEmail}`);
+        } catch (err) {
+          console.error('Nodemailer failed:', err);
+        }
+      }
+    } else {
+      if (process.env.TWILIO_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+        try {
+          const twilio = require('twilio');
+          const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+          await client.messages.create({
+            body: `Your UNICORN password reset verification code is: ${otp}. It will expire in 5 minutes.`,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: formattedPhone,
+          });
+          otpSent = true;
+          console.log(`[Forgot Password Twilio] Sent successfully to ${formattedPhone}`);
+        } catch (err) {
+          console.error('Twilio failed:', err);
+        }
+      }
+    }
+
+    user.otp = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    console.log(`[Forgot Password OTP] OTP: ${otp} generated for ${input}`);
+
+    res.status(200).json({
+      message: otpSent 
+        ? `Verification code sent via ${isEmail ? 'email' : 'SMS'}` 
+        : 'Verification code generated (simulated)',
+      otp: otpSent ? undefined : otp // Always expose OTP if simulated fallback is active
+    });
+  } catch (error) {
+    console.error('Forgot password OTP send error:', error);
+    res.status(500).json({ message: 'Server error sending verification code' });
+  }
+};
+
+// @desc    Reset password using OTP
+// @route   POST /api/auth/forgot-password/reset
+// @access  Public
+const forgotPasswordReset = async (req, res) => {
+  const { phoneOrEmail, otp, newPassword } = req.body;
+
+  if (!phoneOrEmail || !otp || !newPassword) {
+    return res.status(400).json({ message: 'Please provide all required fields' });
+  }
+
+  const input = phoneOrEmail.trim();
+  const isEmail = input.includes('@');
+
+  try {
+    let query = {};
+    if (isEmail) {
+      query = { email: input.toLowerCase() };
+    } else {
+      query = { phone: input };
+    }
+
+    const user = await User.findOne(query);
+    if (!user) {
+      return res.status(404).json({ message: 'Account not found' });
+    }
+
+    if (!user.otp || user.otp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: 'Invalid or expired verification code' });
+    }
+
+    // Set new password (pre-save hook hashes it) and clear OTP
+    user.password = newPassword;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully. You can now log in.' });
+  } catch (error) {
+    console.error('Forgot password reset error:', error);
+    res.status(500).json({ message: 'Server error resetting password' });
+  }
+};
 
 module.exports = {
   authUser,
@@ -347,4 +516,6 @@ module.exports = {
   updateUserRole,
   sendOTP,
   verifyOTP,
+  forgotPasswordSendOTP,
+  forgotPasswordReset,
 };

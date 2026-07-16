@@ -12,12 +12,16 @@ const {
   updateUserRole,
   sendOTP,
   verifyOTP,
+  forgotPasswordSendOTP,
+  forgotPasswordReset,
 } = require('../controllers/authController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.post('/register', registerUser);
 router.post('/login', authUser);
 router.post('/logout', logoutUser);
+router.post('/forgot-password/send', forgotPasswordSendOTP);
+router.post('/forgot-password/reset', forgotPasswordReset);
 router.route('/profile')
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);

@@ -208,6 +208,7 @@ const getUserProfile = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       isAdmin: user.isAdmin,
     });
   } else {
@@ -223,6 +224,9 @@ const updateUserProfile = async (req, res) => {
   if (user) {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
+    if (req.body.phone) {
+      user.phone = req.body.phone;
+    }
     if (req.body.password) {
       user.password = req.body.password;
     }
@@ -232,6 +236,7 @@ const updateUserProfile = async (req, res) => {
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
+      phone: updatedUser.phone,
       isAdmin: updatedUser.isAdmin,
     });
   } else {

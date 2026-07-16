@@ -71,7 +71,9 @@ const Login = () => {
   // Redirect if user is already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      const isNewUser = !user.email || !user.phone || !user.name || user.name.startsWith('User-');
+      // Check phone from DB first, then fall back to localStorage (for existing completed profiles)
+      const hasPhone = user.phone || localStorage.getItem(`unicorn_phone_${user._id}`);
+      const isNewUser = !user.email || !hasPhone || !user.name || user.name.startsWith('User-');
       if (isNewUser) {
         navigate(`/complete-profile?redirect=${encodeURIComponent(redirect)}`);
       } else {

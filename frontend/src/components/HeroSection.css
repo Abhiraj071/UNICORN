@@ -72,11 +72,12 @@
 }
 
 .title {
-  letter-spacing: 8px;
+  font-family: var(--font-brand);
+  letter-spacing: 4px;
   font-size: 3.5rem;
   line-height: 1.2;
   margin-bottom: 1.5rem;
-  font-weight: 1000;
+  font-weight: 400;
   text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
 }
 

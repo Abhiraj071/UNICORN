@@ -501,7 +501,7 @@ const Login = () => {
                 </label>
               </div>
 
-              <button type="submit" className="auth-submit-btn-outline" disabled={loading}>
+              <button type="submit" className="auth-submit-btn-gold" disabled={loading}>
                 {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'} <FiArrowRight className="btn-arrow-icon" />
               </button>
             </form>

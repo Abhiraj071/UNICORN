@@ -598,24 +598,7 @@ const Login = () => {
               </button>
             </form>
 
-            {regTestingOtp && (
-              <div className="auth-test-otp-helper" style={{
-                marginTop: '1.25rem',
-                padding: '0.85rem',
-                background: 'rgba(212, 163, 89, 0.06)',
-                border: '1px dashed rgba(212, 163, 89, 0.3)',
-                borderRadius: '8px',
-                color: 'var(--white)',
-                fontSize: '0.8rem',
-                textAlign: 'center'
-              }}>
-                <span style={{ color: '#d4a359', fontWeight: 600 }}>Test Registration OTP: </span>
-                <strong style={{ letterSpacing: '2px', fontSize: '0.9rem' }}>{regTestingOtp}</strong>
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.7rem', color: 'var(--gray-500)' }}>
-                  (Autofilled for your testing convenience)
-                </p>
-              </div>
-            )}
+
           </div>
         )}
 
@@ -688,24 +671,7 @@ const Login = () => {
               </button>
             </form>
 
-            {forgotTestingOtp && (
-              <div className="auth-test-otp-helper" style={{
-                marginTop: '1.25rem',
-                padding: '0.85rem',
-                background: 'rgba(212, 163, 89, 0.06)',
-                border: '1px dashed rgba(212, 163, 89, 0.3)',
-                borderRadius: '8px',
-                color: 'var(--white)',
-                fontSize: '0.8rem',
-                textAlign: 'center'
-              }}>
-                <span style={{ color: '#d4a359', fontWeight: 600 }}>Test Reset OTP: </span>
-                <strong style={{ letterSpacing: '2px', fontSize: '0.9rem' }}>{forgotTestingOtp}</strong>
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.7rem', color: 'var(--gray-500)' }}>
-                  (Autofilled for your testing convenience)
-                </p>
-              </div>
-            )}
+
           </div>
         )}
 

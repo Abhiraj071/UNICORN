@@ -1,4 +1,5 @@
-import { FiMail, FiArrowRight, FiShield } from 'react-icons/fi';
+import { useState, useEffect, useRef } from 'react';
+import { FiMail, FiArrowRight, FiShield, FiPlay, FiPause, FiVolume2, FiVolumeX, FiMusic } from 'react-icons/fi';
 import './Community.css';
 
 const socialCards = [
@@ -72,50 +73,263 @@ const socialCards = [
   }
 ];
 
+const lyricsData = [
+  { time: 0, text: "" },
+  { time: 5, text: "The velvet gates remain unmoved," },
+  { time: 15, text: "A language that the stars disproved." },
+  { time: 20, text: "An inkwell for the lonely few," },
+  { time: 28, text: "To catch the shade of what was true." },
+  { time: 33, text: "Not made for everyone..." },
+  { time: 38, text: "(Not made for everyone...)" },
+  { time: 42, text: "A path of obsidian and glass," },
+  { time: 50, text: "Where only shadows find the pass." },
+  { time: 70, text: "A thirst for what the light denies," },
+  { time: 90, text: "Beneath these hollow, ancient skies." },
+  { time: 94, text: "Not made for everyone..." },
+  { time: 97, text: "(Whispered) not made for everyone." }
+];
+
 const Community = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const audioRef = useRef(null);
+  const sectionRef = useRef(null);
+  const lyricsContainerRef = useRef(null);
+  const lyricLineRefs = useRef([]);
+
+  // Setup refs for scrolling lyrics
+  if (lyricLineRefs.current.length !== lyricsData.length) {
+    lyricLineRefs.current = Array(lyricsData.length)
+      .fill(null)
+      .map((_, i) => lyricLineRefs.current[i] || null);
+  }
+
+  // Attempt to autoplay when user reaches the section (scrolls to view)
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let hasAutoplayed = false;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAutoplayed) {
+          hasAutoplayed = true;
+          const audio = audioRef.current;
+          if (audio) {
+            audio.play()
+              .then(() => {
+                setIsPlaying(true);
+              })
+              .catch((error) => {
+                console.log("Autoplay blocked by browser policy on viewport intersection.", error);
+                setIsPlaying(false);
+              });
+          }
+          observer.unobserve(section);
+        }
+      },
+      {
+        threshold: 0.15 // Play when 15% of the section is visible
+      }
+    );
+
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  // Find active lyric line index based on current time
+  let activeIndex = 0;
+  for (let i = 0; i < lyricsData.length; i++) {
+    if (currentTime >= lyricsData[i].time) {
+      activeIndex = i;
+    }
+  }
+
+  // Center active lyric line with smooth scrolling
+  useEffect(() => {
+    const activeElement = lyricLineRefs.current[activeIndex];
+    const container = lyricsContainerRef.current;
+    if (activeElement && container) {
+      const containerHeight = container.clientHeight;
+      const elementOffsetTop = activeElement.offsetTop;
+      const elementHeight = activeElement.clientHeight;
+
+      container.scrollTo({
+        top: elementOffsetTop - containerHeight / 2 + elementHeight / 2,
+        behavior: 'smooth'
+      });
+    }
+  }, [activeIndex]);
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(e => console.log("Failed to play", e));
+    }
+  };
+
+  const toggleMute = () => {
+    if (!audioRef.current) return;
+    audioRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
+
+  const handleLyricClick = (time) => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = time;
+    setCurrentTime(time);
+    if (!isPlaying) {
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(e => console.log("Failed to play on skip", e));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     alert('Thank you for joining the Inner Circle!');
   };
 
+  const duration = audioRef.current ? audioRef.current.duration : 0;
+  const progressPercent = audioRef.current && !isNaN(duration) && duration > 0 
+    ? (currentTime / duration) * 100 
+    : 0;
+
   return (
-    <section className="community-section">
-      {/* Newsletter Signup Banner */}
+    <section className="community-section" ref={sectionRef}>
+      {/* Newsletter Signup Banner & Lyric Player */}
       <div className="newsletter-banner">
         <div className="banner-bg-img-wrapper">
           <img src="/images/ComBack.png" alt="Gothic Moon Background" className="banner-bg-img" />
           <div className="banner-overlay"></div>
         </div>
 
-        <div className="banner-content container">
-          <p className="banner-join">JOIN THE</p>
-          <h2 className="banner-title">UNICORN COMMUNITY</h2>
-          <p className="banner-subtitle">
-            Be the first to know about limited drops, exclusive collections,<br />
-            special offers, and everything happening in the world of Unicorn.
-          </p>
+        <div className="banner-content container banner-grid">
+          {/* Left Column - Community Newsletter Signup */}
+          <div className="banner-left-col">
+            <p className="banner-join">JOIN THE</p>
+            <h2 className="banner-title">UNICORN COMMUNITY</h2>
+            <p className="banner-subtitle">
+              Be the first to know about limited drops, exclusive collections,<br />
+              special offers, and everything happening in the world of Unicorn.
+            </p>
 
-          <form className="banner-form" onSubmit={handleSubmit}>
-            <div className="input-with-icon">
-              <FiMail className="mail-icon" />
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                required
-                className="banner-input"
-              />
+            <form className="banner-form" onSubmit={handleSubmit}>
+              <div className="input-with-icon">
+                <FiMail className="mail-icon" />
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  required
+                  className="banner-input"
+                />
+              </div>
+              <button type="submit" className="banner-btn">
+                JOIN THE INNER CIRCLE <FiArrowRight className="arrow-icon" />
+              </button>
+            </form>
+
+            <div className="banner-disclaimer">
+              <FiShield className="shield-icon" />
+              <span>No spam. Only exclusive updates. Unsubscribe anytime.</span>
             </div>
-            <button type="submit" className="banner-btn">
-              JOIN THE INNER CIRCLE <FiArrowRight className="arrow-icon" />
-            </button>
-          </form>
+          </div>
 
-          <div className="banner-disclaimer">
-            <FiShield className="shield-icon" />
-            <span>No spam. Only exclusive updates. Unsubscribe anytime.</span>
+          {/* Right Column - Music Player & Scroll Lyrics */}
+          <div className="banner-right-col">
+            <div className="lyrics-player-card">
+              <div className="player-header">
+                <div className="header-meta">
+                  <FiMusic className="music-note-icon" />
+                  <span className="player-title">VELVET GATES - THEME</span>
+                </div>
+                
+                {/* Visualizer bars that pulse when playing */}
+                <div className={`music-visualizer ${isPlaying ? 'playing' : ''}`}>
+                  <span className="bar bar-1"></span>
+                  <span className="bar bar-2"></span>
+                  <span className="bar bar-3"></span>
+                  <span className="bar bar-4"></span>
+                </div>
+              </div>
+
+              {/* Lyrics Scroll Window */}
+              <div className="lyrics-scroll-container" ref={lyricsContainerRef}>
+                <div className="lyrics-scroll-spacer-top"></div>
+                {lyricsData.map((lyric, idx) => {
+                  if (lyric.text === "") return null;
+                  const isActive = idx === activeIndex;
+                  return (
+                    <p
+                      key={idx}
+                      ref={el => lyricLineRefs.current[idx] = el}
+                      className={`lyric-line ${isActive ? 'active' : ''}`}
+                      onClick={() => handleLyricClick(lyric.time)}
+                    >
+                      {lyric.text}
+                    </p>
+                  );
+                })}
+                <div className="lyrics-scroll-spacer-bottom"></div>
+              </div>
+
+              {/* Player Controls */}
+              <div className="player-controls">
+                <button 
+                  className="control-btn play-pause-btn" 
+                  onClick={togglePlay} 
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? <FiPause /> : <FiPlay />}
+                </button>
+                <div className="waveform-progress">
+                  <div className="progress-bar-bg">
+                    <div 
+                      className="progress-bar-fill" 
+                      style={{ width: `${progressPercent}%` }}
+                    ></div>
+                  </div>
+                  <span className="time-display">
+                    {Math.floor(currentTime / 60)}:{(Math.floor(currentTime % 60)).toString().padStart(2, '0')}
+                  </span>
+                </div>
+                <button 
+                  className="control-btn mute-btn" 
+                  onClick={toggleMute} 
+                  aria-label={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? <FiVolumeX /> : <FiVolume2 />}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Hidden Audio Node */}
+      <audio
+        ref={audioRef}
+        src="/mp3/Velvet_Gates.mp4"
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={() => setIsPlaying(false)}
+      />
 
       {/* Social Connection Cards */}
       <div className="social-connect container">

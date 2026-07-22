@@ -20,7 +20,7 @@ const HeroSection = () => {
           <p className="subtitle">CRAFTED IN DARKNESS</p>
           <h1 className="title">
 
-            WORN WITH<br />CONFIDENCE
+            NOT MADE FOR<br />EVERYONE
 
           </h1>
           <div className="divider"></div>

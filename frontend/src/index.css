@@ -21,10 +21,16 @@
   --divider-color: #1F1F1F;
   --hover-border: #3A3A3A;
 
-  --font-brand: 'Cinzel Decorative', serif;
+  /* --font-brand: 'Cinzel Decorative', serif;
   --font-heading: 'Cinzel', serif;
   --font-heading-decorative: 'Cinzel Decorative', serif;
   --font-body: 'Inter', sans-serif;
+   */
+  --font-brand: "Algerian", serif;
+  --font-heading: "Algerian", serif;
+  --font-heading-decorative: "Algerian", serif;
+  --font-body: "Arial", sans-serif;
+
 
   --radius-btn: 10px;
   --radius-input: 12px;

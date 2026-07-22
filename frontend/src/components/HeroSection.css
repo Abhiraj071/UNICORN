@@ -72,7 +72,7 @@
 }
 
 .title {
-  font-family: var(--font-heading-decorative);
+  font-family: "Algerian", var(--font-heading-decorative);
   letter-spacing: 6px;
   font-size: 3.5rem;
   line-height: 1.2;

@@ -113,33 +113,74 @@ const Community = () => {
 
     let hasAutoplayed = false;
 
+    const startPlay = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      // Try playing unmuted first
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          // If unmuted autoplay is blocked by browser policy, fallback to muted play
+          console.log("Unmuted autoplay blocked. Falling back to muted autoplay...");
+          audio.muted = true;
+          setIsMuted(true);
+          audio.play()
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch((err) => {
+              console.log("Autoplay failed completely:", err);
+              setIsPlaying(false);
+            });
+        });
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAutoplayed) {
           hasAutoplayed = true;
-          const audio = audioRef.current;
-          if (audio) {
-            audio.play()
-              .then(() => {
-                setIsPlaying(true);
-              })
-              .catch((error) => {
-                console.log("Autoplay blocked by browser policy on viewport intersection.", error);
-                setIsPlaying(false);
-              });
-          }
+          startPlay();
           observer.unobserve(section);
         }
       },
       {
-        threshold: 0.15 // Play when 15% of the section is visible
+        threshold: 0.1 // Play when 10% of the section is visible
       }
     );
 
     observer.observe(section);
 
+    // Global listener to unmute & play audio on first user interaction anywhere on the page
+    const handleFirstInteraction = () => {
+      const audio = audioRef.current;
+      if (audio) {
+        if (audio.muted) {
+          audio.muted = false;
+          setIsMuted(false);
+        }
+        if (audio.paused && hasAutoplayed) {
+          audio.play()
+            .then(() => setIsPlaying(true))
+            .catch(() => {});
+        }
+      }
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+    window.addEventListener('touchstart', handleFirstInteraction);
+
     return () => {
       observer.disconnect();
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
     };
   }, []);
 

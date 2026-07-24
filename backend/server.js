@@ -28,6 +28,10 @@ app.use(passport.initialize());
 // Serve static upload files
 app.use('/api/uploads', express.static(uploadsDir));
 
+app.get('/', (req, res) => {
+  res.json({ status: 'success', message: 'Unicorn Store API is running cleanly on Render' });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'API is running' });
 });

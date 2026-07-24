@@ -36,7 +36,17 @@ const Checkout = () => {
 
   // Method states
   const [shippingMethod, setShippingMethod] = useState('standard'); // 'standard' | 'express'
-  const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'card' | 'netbanking' | 'cod'
+  const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'cod'
+  const [upiTxnId, setUpiTxnId] = useState('');
+  const [copiedUpi, setCopiedUpi] = useState(false);
+
+  const handleCopyUpiId = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText('unicornstore@upi');
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2000);
+    }
+  };
 
   // Promo code states
   const [promoInput, setPromoInput] = useState('');
@@ -225,7 +235,7 @@ const Checkout = () => {
         postalCode: pincode,
         country: 'India',
       },
-      paymentMethod: paymentMethod === 'upi' ? 'UPI' : paymentMethod === 'card' ? 'Credit / Debit Card' : paymentMethod === 'netbanking' ? 'Net Banking' : 'Cash on Delivery (COD)',
+      paymentMethod: paymentMethod === 'upi' ? (upiTxnId ? `UPI Scanner (Ref: ${upiTxnId.trim()})` : 'UPI Scanner') : 'Cash on Delivery (COD)',
       totalPrice: grandTotal,
     };
 
@@ -778,7 +788,7 @@ const Checkout = () => {
 
                   <div className="payment-options-stack">
 
-                    {/* UPI Option */}
+                    {/* UPI Scanner Option */}
                     <div
                       className={`payment-option-row ${paymentMethod === 'upi' ? 'selected-payment-row' : ''}`}
                       onClick={() => setPaymentMethod('upi')}
@@ -795,8 +805,8 @@ const Checkout = () => {
                         <div className="payment-meta-info">
                           <span className="payment-icon-symbol">📱</span>
                           <div className="payment-texts-column">
-                            <span className="payment-method-title">UPI Payment</span>
-                            <span className="payment-method-desc">Pay securely using any UPI app</span>
+                            <span className="payment-method-title">UPI Scanner / QR Code</span>
+                            <span className="payment-method-desc">Scan & Pay using GPay, PhonePe, Paytm, BHIM or Cred</span>
                           </div>
                         </div>
                         <div className="payment-brand-logos">
@@ -808,59 +818,132 @@ const Checkout = () => {
                       </label>
                     </div>
 
-                    {/* Credit / Debit Card Option */}
-                    <div
-                      className={`payment-option-row ${paymentMethod === 'card' ? 'selected-payment-row' : ''}`}
-                      onClick={() => setPaymentMethod('card')}
-                    >
-                      <input
-                        type="radio"
-                        id="pay-card"
-                        name="paymentMethod"
-                        checked={paymentMethod === 'card'}
-                        onChange={() => setPaymentMethod('card')}
-                        className="payment-radio-input"
-                      />
-                      <label htmlFor="pay-card" className="payment-label-container" onClick={(e) => e.stopPropagation()}>
-                        <div className="payment-meta-info">
-                          <span className="payment-icon-symbol">💳</span>
-                          <div className="payment-texts-column">
-                            <span className="payment-method-title">Credit / Debit Card</span>
-                            <span className="payment-method-desc">Visa, Mastercard, Rupay & more</span>
+                    {/* Expanded UPI Scanner UI Box */}
+                    {paymentMethod === 'upi' && (
+                      <div className="upi-scanner-expanded-card">
+                        <div className="upi-scanner-header">
+                          <div className="upi-badge-active">
+                            <span className="pulse-dot"></span> Scan QR Code to Pay
                           </div>
+                          <span className="upi-total-tag">Amount: <strong>{formatPrice(grandTotal)}</strong></span>
                         </div>
-                        <div className="payment-brand-logos">
-                          <span className="brand-pill visa">VISA</span>
-                          <span className="brand-pill mastercard">Mastercard</span>
-                          <span className="brand-pill rupay">RuPay</span>
-                        </div>
-                      </label>
-                    </div>
 
-                    {/* Net Banking */}
-                    <div
-                      className={`payment-option-row ${paymentMethod === 'netbanking' ? 'selected-payment-row' : ''}`}
-                      onClick={() => setPaymentMethod('netbanking')}
-                    >
-                      <input
-                        type="radio"
-                        id="pay-netbanking"
-                        name="paymentMethod"
-                        checked={paymentMethod === 'netbanking'}
-                        onChange={() => setPaymentMethod('netbanking')}
-                        className="payment-radio-input"
-                      />
-                      <label htmlFor="pay-netbanking" className="payment-label-container" onClick={(e) => e.stopPropagation()}>
-                        <div className="payment-meta-info">
-                          <span className="payment-icon-symbol">🏦</span>
-                          <div className="payment-texts-column">
-                            <span className="payment-method-title">Net Banking</span>
-                            <span className="payment-method-desc">All major banks supported</span>
+                        <div className="upi-scanner-body">
+                          {/* QR Code Graphic Container */}
+                          <div className="upi-qr-display-box">
+                            <div className="upi-qr-frame">
+                              <span className="qr-corner top-left"></span>
+                              <span className="qr-corner top-right"></span>
+                              <span className="qr-corner bottom-left"></span>
+                              <span className="qr-corner bottom-right"></span>
+
+                              {/* Laser Scan Animation Line */}
+                              <div className="qr-scan-laser"></div>
+
+                              {/* SVG QR Code */}
+                              <svg viewBox="0 0 200 200" className="upi-qr-svg" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="200" height="200" rx="12" fill="#080808" />
+
+                                {/* Finder Patterns */}
+                                <rect x="18" y="18" width="48" height="48" rx="6" fill="none" stroke="#ffffff" strokeWidth="6" />
+                                <rect x="30" y="30" width="24" height="24" rx="3" fill="#d4a359" />
+
+                                <rect x="134" y="18" width="48" height="48" rx="6" fill="none" stroke="#ffffff" strokeWidth="6" />
+                                <rect x="146" y="30" width="24" height="24" rx="3" fill="#d4a359" />
+
+                                <rect x="18" y="134" width="48" height="48" rx="6" fill="none" stroke="#ffffff" strokeWidth="6" />
+                                <rect x="30" y="146" width="24" height="24" rx="3" fill="#d4a359" />
+
+                                {/* Pixel Matrix */}
+                                <rect x="78" y="20" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="94" y="20" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="110" y="20" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+
+                                <rect x="20" y="78" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="36" y="78" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="52" y="78" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+
+                                <rect x="134" y="78" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="150" y="78" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="166" y="78" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+
+                                <rect x="78" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="94" y="134" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="110" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+
+                                <rect x="78" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="94" y="150" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="110" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+
+                                <rect x="134" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="150" y="134" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="166" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+
+                                <rect x="134" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="150" y="150" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="166" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+
+                                <rect x="78" y="166" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="94" y="166" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="110" y="166" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="134" y="166" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+                                <rect x="150" y="166" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
+                                <rect x="166" y="166" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
+
+                                {/* Center UPI Badge */}
+                                <circle cx="100" cy="100" r="26" fill="#080808" stroke="#d4a359" strokeWidth="2" />
+                                <text x="100" y="104" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="sans-serif">UPI</text>
+                              </svg>
+                            </div>
+                            <span className="upi-scan-hint">Scan with GPay, PhonePe, Paytm or BHIM</span>
+                          </div>
+
+                          {/* Instructions & VPA Copy Box */}
+                          <div className="upi-details-column">
+                            <div className="vpa-copy-box">
+                              <span className="vpa-label">UPI ID / VPA:</span>
+                              <div className="vpa-field">
+                                <code className="vpa-code">unicornstore@upi</code>
+                                <button type="button" className="vpa-copy-btn" onClick={handleCopyUpiId}>
+                                  {copiedUpi ? '✓ Copied' : 'Copy'}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="upi-instructions-list">
+                              <div className="instruction-step">
+                                <span className="step-num">1</span>
+                                <span>Open any UPI app on your phone</span>
+                              </div>
+                              <div className="instruction-step">
+                                <span className="step-num">2</span>
+                                <span>Scan QR Code to pay {formatPrice(grandTotal)}</span>
+                              </div>
+                              <div className="instruction-step">
+                                <span className="step-num">3</span>
+                                <span>Click <strong>PLACE ORDER</strong> below</span>
+                              </div>
+                            </div>
+
+                            {/* Optional UTR Field */}
+                            <div className="upi-utr-box">
+                              <label htmlFor="upi-utr-input" className="utr-label">
+                                UPI Ref / UTR No. <span className="utr-optional">(Optional)</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="upi-utr-input"
+                                className="utr-input-field"
+                                placeholder="12-digit UTR number after payment"
+                                value={upiTxnId}
+                                onChange={(e) => setUpiTxnId(e.target.value)}
+                                maxLength={16}
+                              />
+                            </div>
                           </div>
                         </div>
-                        <span className="bank-building-icon">🏛</span>
-                      </label>
-                    </div>
+                      </div>
+                    )}
 
                     {/* Cash on Delivery */}
                     <div
@@ -880,7 +963,7 @@ const Checkout = () => {
                           <span className="payment-icon-symbol">💵</span>
                           <div className="payment-texts-column">
                             <span className="payment-method-title">Cash on Delivery (COD)</span>
-                            <span className="payment-method-desc">Pay when you receive</span>
+                            <span className="payment-method-desc">Pay with cash when your package is delivered</span>
                           </div>
                         </div>
                         <span className="cod-cash-icon">🤝</span>

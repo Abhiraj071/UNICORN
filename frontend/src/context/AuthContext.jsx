@@ -5,7 +5,7 @@ const AuthContext = createContext();
 
 // Create configured axios instance
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   withCredentials: true,
 });
 

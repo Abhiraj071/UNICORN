@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../config/apiConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FiTrash2,
@@ -37,7 +38,7 @@ const Cart = () => {
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
-        const res = await fetch('/api/products');
+        const res = await fetch(getApiUrl('/api/products'));
         if (res.ok) {
           const data = await res.json();
           // Filter out products already in cart

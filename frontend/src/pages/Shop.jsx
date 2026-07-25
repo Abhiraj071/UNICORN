@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../config/apiConfig';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { 
   FiHeart, 
@@ -132,8 +133,8 @@ const Shop = () => {
     const fetchData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          fetch('/api/products'),
-          fetch('/api/categories')
+          fetch(getApiUrl('/api/products')),
+          fetch(getApiUrl('/api/categories'))
         ]);
         if (!prodRes.ok || !catRes.ok) {
           throw new Error('Failed to fetch database information');

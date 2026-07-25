@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../config/apiConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiHeart, FiShoppingBag, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
@@ -25,7 +26,7 @@ const Wishlist = () => {
           return;
         }
 
-        const res = await fetch('/api/products');
+        const res = await fetch(getApiUrl('/api/products'));
         if (!res.ok) {
           throw new Error('Failed to summon products database.');
         }

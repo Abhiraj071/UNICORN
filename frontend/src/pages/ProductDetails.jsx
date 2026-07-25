@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../config/apiConfig';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   FiHeart, 
@@ -60,7 +61,7 @@ const ProductDetails = () => {
       setLoading(true);
       try {
         // Fetch current product
-        const res = await fetch(`/api/products/${id}`);
+        const res = await fetch(getApiUrl(`/api/products/${id}`));
         if (!res.ok) {
           throw new Error('Product not found in the shadows.');
         }
@@ -74,14 +75,14 @@ const ProductDetails = () => {
         }
 
         // Fetch reviews
-        const revRes = await fetch(`/api/reviews/product/${id}`);
+        const revRes = await fetch(getApiUrl(`/api/reviews/product/${id}`));
         if (revRes.ok) {
           const revData = await revRes.json();
           setReviews(revData);
         }
 
         // Fetch all products to filter recommendations
-        const allRes = await fetch('/api/products');
+        const allRes = await fetch(getApiUrl('/api/products'));
         if (allRes.ok) {
           const allData = await allRes.json();
           // Filter out current product, and prioritize same category or collection

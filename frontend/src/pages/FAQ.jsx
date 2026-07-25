@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../config/apiConfig';
 import { FiChevronDown, FiChevronUp, FiMessageSquare } from 'react-icons/fi';
 import './FAQ.css';
 
@@ -43,7 +44,7 @@ const FAQ = () => {
   useEffect(() => {
     const fetchFaqs = async () => {
       try {
-        const res = await fetch('/api/faqs');
+        const res = await fetch(getApiUrl('/api/faqs'));
         if (res.ok) {
           const data = await res.json();
           if (data && data.length > 0) {

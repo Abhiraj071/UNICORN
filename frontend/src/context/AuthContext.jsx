@@ -1,12 +1,20 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const AuthContext = createContext();
 
 // Create configured axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
+});
+
+api.interceptors.request.use((config) => {
+  if (config.url && config.url.startsWith('/api/')) {
+    config.url = config.url.replace(/^\/api/, '');
+  }
+  return config;
 });
 
 export const AuthProvider = ({ children }) => {

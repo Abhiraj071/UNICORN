@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../config/apiConfig';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   FiUser, 
@@ -275,7 +276,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = '/api/auth/google';
+    window.location.href = getApiUrl('/api/auth/google');
   };
 
   const switchTab = (tab) => {

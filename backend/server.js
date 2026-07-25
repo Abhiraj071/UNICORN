@@ -19,7 +19,29 @@ const app = express();
 const passport = require('passport');
 require('./config/passport');
 
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://unicornonlyx.com',
+  'https://www.unicornonlyx.com',
+  'http://localhost:5173',
+  'http://localhost:5000'
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.indexOf(origin) !== -1 ||
+      origin.includes('herositepro.com') ||
+      origin.includes('milesweb') ||
+      origin.includes('unicornonlyx.com')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

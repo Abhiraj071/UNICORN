@@ -21,6 +21,8 @@ require('./config/passport');
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://unicornonyx.com',
+  'https://www.unicornonyx.com',
   'https://unicornonlyx.com',
   'https://www.unicornonlyx.com',
   'http://localhost:5173',
@@ -34,6 +36,7 @@ app.use(cors({
       allowedOrigins.indexOf(origin) !== -1 ||
       origin.includes('herositepro.com') ||
       origin.includes('milesweb') ||
+      origin.includes('unicornonyx.com') ||
       origin.includes('unicornonlyx.com')
     ) {
       return callback(null, true);

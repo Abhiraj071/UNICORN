@@ -254,13 +254,14 @@ router.get(
       }
     }
     
-    passport.authenticate('google', { session: false, failureRedirect: '/login' })(req, res, (err) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    passport.authenticate('google', { session: false, failureRedirect: `${frontendUrl}/login?error=google_failed` })(req, res, (err) => {
       if (err) {
         console.error('Google Passport Callback Error:', err);
-        return res.redirect((process.env.FRONTEND_URL || 'http://localhost:5173') + '/login?error=oauth_failed');
+        return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
       }
       generateToken(res, req.user._id);
-      res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
+      res.redirect(frontendUrl);
     });
   }
 );

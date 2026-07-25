@@ -25,6 +25,7 @@
   width: 100%;
   height: 100%;
   z-index: 1;
+  background: radial-gradient(circle at 60% 40%, #1a1524 0%, #0d0a14 50%, #050408 100%);
 }
 
 .banner-bg-img {

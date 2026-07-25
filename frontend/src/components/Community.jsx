@@ -258,7 +258,12 @@ const Community = () => {
       {/* Newsletter Signup Banner & Lyric Player */}
       <div className="newsletter-banner">
         <div className="banner-bg-img-wrapper">
-          <img src="/images/ComBack.png" alt="Gothic Moon Background" className="banner-bg-img" />
+          <img
+            src="/images/ComBack.png"
+            alt="Gothic Moon Background"
+            className="banner-bg-img"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
           <div className="banner-overlay"></div>
         </div>
 
@@ -364,10 +369,11 @@ const Community = () => {
         </div>
       </div>
 
-      {/* Hidden Audio Node */}
+      {/* Hidden Audio Node with Instant Auto-Preload */}
       <audio
         ref={audioRef}
         src="/mp3/Velvet_Gates.mp4"
+        preload="auto"
         onTimeUpdate={handleTimeUpdate}
         onEnded={() => setIsPlaying(false)}
       />

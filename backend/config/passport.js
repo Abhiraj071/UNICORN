@@ -2,10 +2,12 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
+const backendUrl = process.env.BACKEND_URL || (process.env.NODE_ENV === 'production' ? 'https://unicorn-ln99.onrender.com' : 'http://localhost:5000');
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || 'dummy-client-id',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy-client-secret',
-    callbackURL: (process.env.BACKEND_URL || "http://localhost:5000") + "/api/auth/google/callback"
+    callbackURL: `${backendUrl}/api/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, done) => {
     try {

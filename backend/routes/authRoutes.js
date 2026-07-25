@@ -254,7 +254,7 @@ router.get(
       }
     }
     
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://unicornonyx.com' : 'http://localhost:5173');
     passport.authenticate('google', { session: false, failureRedirect: `${frontendUrl}/login?error=google_failed` })(req, res, (err) => {
       if (err) {
         console.error('Google Passport Callback Error:', err);

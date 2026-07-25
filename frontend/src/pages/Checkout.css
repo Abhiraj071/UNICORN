@@ -657,6 +657,31 @@
   line-height: 1.2;
 }
 
+.upi-direct-pay-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #d4a359 0%, #b88338 100%);
+  color: #000000;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-top: 0.4rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(212, 163, 89, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.upi-direct-pay-link-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(212, 163, 89, 0.4);
+  background: linear-gradient(135deg, #e5b46a 0%, #c99449 100%);
+  color: #000000;
+}
+
 .upi-details-column {
   display: flex;
   flex-direction: column;

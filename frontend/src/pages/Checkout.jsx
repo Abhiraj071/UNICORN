@@ -40,9 +40,11 @@ const Checkout = () => {
   const [upiTxnId, setUpiTxnId] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
 
+  const MERCH_UPI_ID = '9425483184-2@ybl';
+
   const handleCopyUpiId = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('unicornstore@upi');
+      navigator.clipboard.writeText(MERCH_UPI_ID);
       setCopiedUpi(true);
       setTimeout(() => setCopiedUpi(false), 2000);
     }
@@ -840,62 +842,21 @@ const Checkout = () => {
                               {/* Laser Scan Animation Line */}
                               <div className="qr-scan-laser"></div>
 
-                              {/* SVG QR Code */}
-                              <svg viewBox="0 0 200 200" className="upi-qr-svg" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="200" height="200" rx="12" fill="#080808" />
-
-                                {/* Finder Patterns */}
-                                <rect x="18" y="18" width="48" height="48" rx="6" fill="none" stroke="#ffffff" strokeWidth="6" />
-                                <rect x="30" y="30" width="24" height="24" rx="3" fill="#d4a359" />
-
-                                <rect x="134" y="18" width="48" height="48" rx="6" fill="none" stroke="#ffffff" strokeWidth="6" />
-                                <rect x="146" y="30" width="24" height="24" rx="3" fill="#d4a359" />
-
-                                <rect x="18" y="134" width="48" height="48" rx="6" fill="none" stroke="#ffffff" strokeWidth="6" />
-                                <rect x="30" y="146" width="24" height="24" rx="3" fill="#d4a359" />
-
-                                {/* Pixel Matrix */}
-                                <rect x="78" y="20" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="94" y="20" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="110" y="20" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-
-                                <rect x="20" y="78" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="36" y="78" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="52" y="78" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-
-                                <rect x="134" y="78" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="150" y="78" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="166" y="78" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-
-                                <rect x="78" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="94" y="134" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="110" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-
-                                <rect x="78" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="94" y="150" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="110" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-
-                                <rect x="134" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="150" y="134" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="166" y="134" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-
-                                <rect x="134" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="150" y="150" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="166" y="150" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-
-                                <rect x="78" y="166" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="94" y="166" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="110" y="166" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="134" y="166" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-                                <rect x="150" y="166" width="12" height="12" rx="2" fill="#d4a359" opacity="0.9" />
-                                <rect x="166" y="166" width="12" height="12" rx="2" fill="#ffffff" opacity="0.9" />
-
-                                {/* Center UPI Badge */}
-                                <circle cx="100" cy="100" r="26" fill="#080808" stroke="#d4a359" strokeWidth="2" />
-                                <text x="100" y="104" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="bold" fontFamily="sans-serif">UPI</text>
-                              </svg>
+                              {/* Real Dynamic Scan & Pay QR Code */}
+                              <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=9425483184-2@ybl&pn=UnicornStore&am=${grandTotal}&tn=Order%20Payment&cu=INR`)}`}
+                                alt="Scan & Pay UPI QR Code"
+                                className="upi-qr-img"
+                                style={{ width: '144px', height: '144px', borderRadius: '8px', objectFit: 'contain' }}
+                              />
                             </div>
                             <span className="upi-scan-hint">Scan with GPay, PhonePe, Paytm or BHIM</span>
+                            <a
+                              href={`upi://pay?pa=9425483184-2@ybl&pn=UnicornStore&am=${grandTotal}&tn=Order%20Payment&cu=INR`}
+                              className="upi-direct-pay-link-btn"
+                            >
+                              ⚡ PAY ₹{grandTotal} VIA UPI APP
+                            </a>
                           </div>
 
                           {/* Instructions & VPA Copy Box */}
@@ -903,7 +864,7 @@ const Checkout = () => {
                             <div className="vpa-copy-box">
                               <span className="vpa-label">UPI ID / VPA:</span>
                               <div className="vpa-field">
-                                <code className="vpa-code">unicornstore@upi</code>
+                                <code className="vpa-code">9425483184-2@ybl</code>
                                 <button type="button" className="vpa-copy-btn" onClick={handleCopyUpiId}>
                                   {copiedUpi ? '✓ Copied' : 'Copy'}
                                 </button>

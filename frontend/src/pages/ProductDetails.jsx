@@ -67,7 +67,8 @@ const ProductDetails = () => {
         }
         const data = await res.json();
         setProduct(data);
-        setActiveImage(data.image);
+        const initialImg = data.image || (data.gallery && data.gallery[0]) || '/images/1.png';
+        setActiveImage(initialImg);
         if (data.sizes && data.sizes.length > 0) {
           setSelectedSize(data.sizes[0]);
         } else {
@@ -175,15 +176,22 @@ const ProductDetails = () => {
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : 0;
 
-  // Gallery Images - Create a list of 4 thumbnail values (if gallery has < 4, repeat or use related images)
-  const galleryImages = [
-    product.image,
-    ...(product.gallery || []),
-    // Extra visual thumbnails to make it look full and rich (gothic style)
-    '/images/11.png',
-    '/images/12.png',
-    '/images/13.png'
-  ].slice(0, 5); // display up to 5 thumbnails in side panel
+  // Gallery Images - Create a guaranteed list of valid thumbnail images with fallbacks
+  const primaryImg = product.image || (product.gallery && product.gallery[0]) || '/images/1.png';
+  const customGallery = (product.gallery && product.gallery.length > 0) ? product.gallery : [];
+  
+  const rawGalleryList = [
+    primaryImg,
+    ...customGallery,
+    '/images/1.png',
+    '/images/2.png',
+    '/images/3.png',
+    '/images/4.png'
+  ];
+
+  // Remove duplicate entries and falsy strings
+  const galleryImages = Array.from(new Set(rawGalleryList.filter(Boolean))).slice(0, 4);
+  const currentActiveImage = activeImage || primaryImg;
 
   // Price Formatter
   const formatPrice = (price) => {
@@ -239,7 +247,7 @@ const ProductDetails = () => {
                 <FiMaximize2 size={16} />
               </button>
               <img 
-                src={getImageUrl(activeImage)} 
+                src={getImageUrl(currentActiveImage)} 
                 alt={product.name} 
                 className="main-active-image" 
                 onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}

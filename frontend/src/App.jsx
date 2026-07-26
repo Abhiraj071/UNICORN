@@ -24,30 +24,35 @@ const MainContent = () => {
   const { user } = useAuth();
   const location = useLocation();
 
-  // Launch countdown mode state
+  // Launch countdown target: July 26, 2026 at 7:00 PM IST (19:00:00)
   const targetLaunchTime = new Date('2026-07-26T19:00:00+05:30').getTime();
+  
   const [bypassedLaunch, setBypassedLaunch] = useState(() => {
-    return localStorage.getItem('unicorn_launch_bypassed') === 'true';
+    // Clear old localStorage keys to ensure countdown renders for all returning visitors
+    localStorage.removeItem('unicorn_launch_bypassed');
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('preview') === 'true' || sessionStorage.getItem('unicorn_launch_preview') === 'true';
   });
 
   const isBeforeLaunch = Date.now() < targetLaunchTime;
   const isLaunchRoute = location.pathname === '/launch';
   const showLaunchCountdown = isLaunchRoute || (isBeforeLaunch && !bypassedLaunch && location.pathname === '/');
 
-  // Reset bypass state whenever /launch is explicitly opened
+  // Reset preview bypass whenever /launch route is accessed
   useEffect(() => {
     if (isLaunchRoute) {
-      localStorage.removeItem('unicorn_launch_bypassed');
+      sessionStorage.removeItem('unicorn_launch_preview');
       setBypassedLaunch(false);
     }
   }, [isLaunchRoute]);
 
   const handleEnterStore = () => {
-    localStorage.setItem('unicorn_launch_bypassed', 'true');
+    sessionStorage.setItem('unicorn_launch_preview', 'true');
     setBypassedLaunch(true);
   };
 
   const handleResetLaunch = () => {
+    sessionStorage.removeItem('unicorn_launch_preview');
     localStorage.removeItem('unicorn_launch_bypassed');
     setBypassedLaunch(false);
   };

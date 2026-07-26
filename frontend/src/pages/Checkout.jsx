@@ -119,9 +119,9 @@ const Checkout = () => {
     if (paymentMethod === 'upi') {
       const cleanTxn = upiTxnId.trim();
       if (!cleanTxn) {
-        errors.upiTxnId = '12-digit UPI UTR / Transaction Reference ID is required to confirm payment';
-      } else if (cleanTxn.length < 8) {
-        errors.upiTxnId = 'Please enter a valid 12-digit UPI UTR / Transaction Reference ID';
+        errors.upiTxnId = '12-digit UPI UTR / Ref No. is required to confirm payment';
+      } else if (!/^[0-9]{12}$/.test(cleanTxn)) {
+        errors.upiTxnId = 'Invalid UTR format. UTR must be exactly 12 numeric digits from your UPI app payment receipt.';
       }
     }
 
@@ -227,8 +227,8 @@ const Checkout = () => {
     }
   }, []);
 
-  const executePlaceOrder = async (confirmedPaymentId) => {
-    const txnId = confirmedPaymentId || (upiTxnId ? upiTxnId.trim() : '');
+  const executePlaceOrder = async () => {
+    const cleanUtr = upiTxnId.trim();
     const orderData = {
       orderItems: cartItems.map(item => ({
         name: item.name,
@@ -243,15 +243,11 @@ const Checkout = () => {
         postalCode: pincode,
         country: 'India',
       },
-      paymentMethod: paymentMethod === 'phonepe'
-        ? `PhonePe Business (${txnId})`
-        : (paymentMethod === 'razorpay'
-            ? `Razorpay Gateway (${txnId})`
-            : (paymentMethod === 'upi' ? `UPI Scanner (Ref: ${txnId})` : 'Cash on Delivery (COD)')),
-      upiTxnId: txnId || undefined,
+      paymentMethod: paymentMethod === 'upi' ? `UPI Scanner (Ref: ${cleanUtr})` : 'Cash on Delivery (COD)',
+      upiTxnId: paymentMethod === 'upi' ? cleanUtr : undefined,
       totalPrice: grandTotal,
-      isPaid: paymentMethod === 'upi' || paymentMethod === 'razorpay' || paymentMethod === 'phonepe',
-      paidAt: (paymentMethod === 'upi' || paymentMethod === 'razorpay' || paymentMethod === 'phonepe') ? new Date().toISOString() : undefined,
+      isPaid: paymentMethod === 'upi',
+      paidAt: paymentMethod === 'upi' ? new Date().toISOString() : undefined,
     };
 
     setOrderLoading(true);
@@ -304,83 +300,6 @@ const Checkout = () => {
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         errorElement.focus();
-      }
-      return;
-    }
-
-    if (paymentMethod === 'phonepe') {
-      setOrderLoading(true);
-      try {
-        const { data } = await api.post('/payment/phonepe/pay', {
-          amount: grandTotal,
-          redirectUrl: `${window.location.origin}/order-success`
-        });
-        if (data && data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        } else {
-          alert('PhonePe payment initiation failed.');
-          setOrderLoading(false);
-        }
-      } catch (pErr) {
-        console.error('PhonePe PG Error:', pErr);
-        alert(pErr.response?.data?.message || 'PhonePe Business PG keys are not configured in backend .env. Please add PhonePe keys or use UPI Scanner / Razorpay.');
-        setOrderLoading(false);
-      }
-      return;
-    }
-
-    if (paymentMethod === 'razorpay') {
-      setOrderLoading(true);
-      try {
-        const { data } = await api.post('/payment/razorpay/order', { amount: grandTotal });
-        const options = {
-          key: data.keyId,
-          amount: data.amount,
-          currency: data.currency,
-          name: 'UNICORN ONYX',
-          description: 'Order Payment',
-          order_id: data.id,
-          prefill: {
-            name: fullName,
-            email: email,
-            contact: phone
-          },
-          theme: {
-            color: '#d4a359'
-          },
-          handler: async (response) => {
-            try {
-              const verifyRes = await api.post('/payment/razorpay/verify', {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              });
-              if (verifyRes.data && verifyRes.data.success) {
-                await executePlaceOrder(response.razorpay_payment_id);
-              }
-            } catch (vErr) {
-              alert('Payment Verification Failed: Invalid signature!');
-              setOrderLoading(false);
-            }
-          },
-          modal: {
-            ondismiss: () => {
-              setOrderLoading(false);
-            }
-          }
-        };
-
-        if (window.Razorpay) {
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-        } else {
-          alert('Razorpay Checkout library loading. Please try again in a moment.');
-          setOrderLoading(false);
-        }
-      } catch (err) {
-        console.error('Razorpay Order Error:', err);
-        alert(err.response?.data?.message || 'Razorpay Gateway is currently not active. Please use UPI Scanner or PhonePe.');
-        setOrderLoading(false);
       }
       return;
     }
@@ -1021,35 +940,6 @@ const Checkout = () => {
                         </div>
                       </div>
                     )}
-
-                    {/* Instant Bank Verified Gateway Option */}
-                    <div
-                      className={`payment-option-row ${paymentMethod === 'razorpay' ? 'selected-payment-row' : ''}`}
-                      onClick={() => setPaymentMethod('razorpay')}
-                    >
-                      <input
-                        type="radio"
-                        id="pay-razorpay"
-                        name="paymentMethod"
-                        checked={paymentMethod === 'razorpay'}
-                        onChange={() => setPaymentMethod('razorpay')}
-                        className="payment-radio-input"
-                      />
-                      <label htmlFor="pay-razorpay" className="payment-label-container" onClick={(e) => e.stopPropagation()}>
-                        <div className="payment-meta-info">
-                          <span className="payment-icon-symbol">⚡</span>
-                          <div className="payment-texts-column">
-                            <span className="payment-method-title">Instant Payment Gateway (Automated Bank Verification)</span>
-                            <span className="payment-method-desc">Instant Bank Verification • GPay, PhonePe, Paytm, Cards, NetBanking</span>
-                          </div>
-                        </div>
-                        <div className="payment-brand-logos">
-                          <span className="brand-pill gpay">Razorpay</span>
-                          <span className="brand-pill phonepe">PhonePe</span>
-                          <span className="brand-pill paytm">Paytm</span>
-                        </div>
-                      </label>
-                    </div>
 
                     {/* Cash on Delivery */}
                     <div

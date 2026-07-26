@@ -421,6 +421,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -433,23 +442,42 @@ const AdminDashboard = () => {
 
     try {
       for (let i = 0; i < files.length; i++) {
-        setUploadCurrent(i);
+        setUploadCurrent(i + 1);
         const file = files[i];
-        const formData = new FormData();
-        formData.append('image', file);
 
-        const { data } = await api.post('/upload', formData);
-        uploadedUrls.push(data.image);
+        let finalUrl = null;
+
+        // Attempt 1: Try backend upload API
+        try {
+          const formData = new FormData();
+          formData.append('image', file);
+          const { data } = await api.post('/upload', formData);
+          if (data && data.image) {
+            finalUrl = getImageUrl(data.image);
+          }
+        } catch (uploadErr) {
+          console.warn('Backend upload API error, converting to Base64:', uploadErr);
+        }
+
+        // Attempt 2: Fallback to Base64 Data URL so uploaded image NEVER breaks
+        if (!finalUrl) {
+          finalUrl = await convertFileToBase64(file);
+        }
+
+        if (finalUrl) {
+          uploadedUrls.push(finalUrl);
+        }
       }
 
       if (uploadedUrls.length > 0) {
-        setFormImage(uploadedUrls[0]);
+        if (!formImage) {
+          setFormImage(uploadedUrls[0]);
+        }
         setFormGallery((prev) => [...prev, ...uploadedUrls]);
       }
     } catch (err) {
-      console.error(err);
-      const errMsg = err.response?.data?.message || 'Failed to upload image. Make sure it is an image file under supported formats.';
-      alert(errMsg);
+      console.error('Upload processing error:', err);
+      alert('Failed to process uploaded file.');
     } finally {
       setImageUploading(false);
       setUploadTotal(0);
@@ -3902,6 +3930,14 @@ const AdminDashboard = () => {
                         required
                         style={{ flex: 1 }}
                       />
+                      {formImage && (
+                        <img 
+                          src={getImageUrl(formImage)} 
+                          alt="Main Preview" 
+                          style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+                          onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                        />
+                      )}
                       <label className="gothic-cta-btn" style={{
                         padding: '0.65rem 1rem',
                         backgroundColor: 'var(--color-gold)',

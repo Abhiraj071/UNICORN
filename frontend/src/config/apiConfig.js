@@ -29,14 +29,27 @@ export const getApiUrl = (endpoint) => {
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return '/images/1.png';
   if (typeof imagePath !== 'string') return '/images/1.png';
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
   
-  if (imagePath.startsWith('/uploads/') || imagePath.startsWith('uploads/')) {
-    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    const backendBase = API_BASE_URL.replace(/\/api\/?$/, '');
-    return `${backendBase}/api${cleanPath}`;
+  // Base64 Data URLs and external HTTP/HTTPS URLs pass through directly
+  if (imagePath.startsWith('data:') || imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
   }
   
+  const defaultBackend = 'https://unicorn-ln99.onrender.com';
+  let backendHost = defaultBackend;
+  if (API_BASE_URL && API_BASE_URL.startsWith('http')) {
+    backendHost = API_BASE_URL.replace(/\/api\/?$/, '');
+  }
+
+  if (imagePath.includes('/uploads/')) {
+    const uploadSubpath = imagePath.substring(imagePath.indexOf('/uploads/'));
+    return `${backendHost}/api${uploadSubpath}`;
+  }
+  
+  if (imagePath.startsWith('uploads/')) {
+    return `${backendHost}/api/${imagePath}`;
+  }
+
   if (!imagePath.startsWith('/')) {
     return `/${imagePath}`;
   }

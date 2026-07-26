@@ -4,7 +4,6 @@ import './LaunchCountdown.css';
 const LaunchCountdown = ({ onEnterStore }) => {
   // Target Launch Date: July 26, 2026 at 7:00 PM IST (19:00:00)
   const getTargetDate = () => {
-    // 2026-07-26T19:00:00+05:30
     return new Date('2026-07-26T19:00:00+05:30').getTime();
   };
 
@@ -43,15 +42,15 @@ const LaunchCountdown = ({ onEnterStore }) => {
     };
     window.addEventListener('resize', handleResize);
 
-    const particleCount = Math.min(50, Math.floor(width / 30));
+    const particleCount = Math.min(55, Math.floor(width / 25));
     const particles = Array.from({ length: particleCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      radius: Math.random() * 1.8 + 0.5,
-      color: Math.random() > 0.3 ? '#8ab897' : '#d4a359',
-      opacity: Math.random() * 0.7 + 0.2,
+      radius: Math.random() * 1.8 + 0.4,
+      color: Math.random() > 0.35 ? '#8ab897' : '#d4a359',
+      opacity: Math.random() * 0.75 + 0.2,
       speedY: -(Math.random() * 0.4 + 0.1),
-      speedX: (Math.random() - 0.5) * 0.2,
+      speedX: (Math.random() - 0.5) * 0.25,
     }));
 
     const render = () => {
@@ -70,7 +69,7 @@ const LaunchCountdown = ({ onEnterStore }) => {
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.opacity;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 10;
         ctx.shadowColor = p.color;
         ctx.fill();
       });
@@ -96,18 +95,18 @@ const LaunchCountdown = ({ onEnterStore }) => {
 
   return (
     <div className="launch-container fade-in">
-      {/* Particle Canvas */}
+      {/* Background Floating Particle Canvas */}
       <canvas ref={canvasRef} className="launch-canvas" />
 
-      {/* SVG Luxury Arch Graphics */}
-      <svg className="launch-arches-bg" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 100 800 A 300 400 0 0 1 700 800" stroke="#8ab897" strokeWidth="0.75" strokeDasharray="4 4" opacity="0.35" />
-        <path d="M 160 800 A 240 340 0 0 1 640 800" stroke="#d4a359" strokeWidth="0.75" opacity="0.25" />
-        <path d="M 220 800 A 180 280 0 0 1 580 800" stroke="#8ab897" strokeWidth="0.5" opacity="0.2" />
-        <path d="M 280 800 A 120 220 0 0 1 520 800" stroke="#d4a359" strokeWidth="0.5" strokeDasharray="3 3" opacity="0.3" />
+      {/* SVG Luxury Arch Background */}
+      <svg className="launch-arches-bg" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 50 1000 A 450 650 0 0 1 950 1000" stroke="#8ab897" strokeWidth="0.8" strokeDasharray="5 5" opacity="0.28" />
+        <path d="M 120 1000 A 380 570 0 0 1 880 1000" stroke="#d4a359" strokeWidth="0.8" opacity="0.22" />
+        <path d="M 190 1000 A 310 490 0 0 1 810 1000" stroke="#8ab897" strokeWidth="0.6" opacity="0.18" />
+        <path d="M 260 1000 A 240 410 0 0 1 740 1000" stroke="#d4a359" strokeWidth="0.6" strokeDasharray="4 4" opacity="0.25" />
       </svg>
 
-      {/* Content Overlay */}
+      {/* Content Layer */}
       <div className="launch-content">
         {/* Diamond Line Ornament */}
         <div className="launch-ornament">
@@ -116,10 +115,11 @@ const LaunchCountdown = ({ onEnterStore }) => {
           <span className="launch-ornament-line"></span>
         </div>
 
-        {/* Title */}
+        {/* Brand Title - Single Line UNICORN ONYX */}
         <div className="launch-title-wrapper">
           <h1 className="launch-title">
-            UNICORN <span className="launch-title-onyx">ONYX</span>
+            <span className="launch-title-unicorn">UNICORN</span>
+            <span className="launch-title-onyx">ONYX</span>
           </h1>
         </div>
 
@@ -146,7 +146,7 @@ const LaunchCountdown = ({ onEnterStore }) => {
           </div>
         </div>
 
-        {/* Footer Announcement */}
+        {/* Footer Launch Date */}
         {isLaunched ? (
           <button onClick={onEnterStore} className="launch-unveil-btn glow-effect">
             ENTER UNICORN ONYX STORE
@@ -158,7 +158,7 @@ const LaunchCountdown = ({ onEnterStore }) => {
         )}
       </div>
 
-      {/* Admin / Tester Preview Bypass Button */}
+      {/* Secret / Tester Preview Bypass Button */}
       <button onClick={onEnterStore} className="launch-bypass-btn">
         ENTER STORE (PREVIEW)
       </button>

@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # If request points directly to frontend/dist files, serve them
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # If frontend/dist subfolder contains the file
+  RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -f [OR]
+  RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -d
+  RewriteRule ^(.*)$ frontend/dist/$1 [L]
+
+  # Fallback for SPA routing to index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /frontend/dist/index.html [L]
+</IfModule>

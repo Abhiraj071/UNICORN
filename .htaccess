@@ -2,18 +2,18 @@
   RewriteEngine On
   RewriteBase /
 
-  # If request points directly to frontend/dist files, serve them
+  # Serve real files or directories immediately if they exist at root
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # If frontend/dist subfolder contains the file
-  RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -f [OR]
-  RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -d
-  RewriteRule ^(.*)$ frontend/dist/$1 [L]
+  # Map static asset folders if serving from root document directory
+  RewriteRule ^images/(.*)$ frontend/dist/images/$1 [L]
+  RewriteRule ^assets/(.*)$ frontend/dist/assets/$1 [L]
+  RewriteRule ^mp3/(.*)$ frontend/dist/mp3/$1 [L]
 
-  # Fallback for SPA routing to index.html
+  # Fallback all client routes to index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /frontend/dist/index.html [L]
+  RewriteRule . /index.html [L]
 </IfModule>

@@ -18,7 +18,7 @@ import {
 import { useCart } from '../context/CartContext';
 import './Cart.css';
 
-const FREE_SHIPPING_THRESHOLD = 1999;
+const FREE_SHIPPING_THRESHOLD = 0;
 const DISCOUNT_PERCENT = 10; // 10% auto-applied discount matching the mockup
 
 const Cart = () => {
@@ -62,14 +62,14 @@ const Cart = () => {
     }).format(price);
   };
 
-  // Calculations
-  const shippingCost = cartSubtotal >= FREE_SHIPPING_THRESHOLD || cartSubtotal === 0 ? 0 : 99;
+  // Calculations (FREE SHIPPING ON ALL ORDERS)
+  const shippingCost = 0;
   const discountAmount = (cartSubtotal * DISCOUNT_PERCENT) / 100;
-  const grandTotal = cartSubtotal + shippingCost - discountAmount;
+  const grandTotal = Math.max(0, cartSubtotal - discountAmount);
 
-  // Free shipping remaining progress
-  const amountAway = FREE_SHIPPING_THRESHOLD - cartSubtotal;
-  const progressPercent = Math.min((cartSubtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
+  // Free shipping progress bar
+  const amountAway = 0;
+  const progressPercent = 100;
 
   const handleCheckout = () => {
     navigate('/checkout');
@@ -174,19 +174,13 @@ const Cart = () => {
                 <div className="shipping-message-row">
                   <FiTruck className="shipping-truck-icon" />
                   <span>
-                    {cartSubtotal >= FREE_SHIPPING_THRESHOLD ? (
-                      <strong>You qualify for FREE SHIPPING!</strong>
-                    ) : (
-                      <>
-                        You are <strong>{formatPrice(amountAway)}</strong> away from <strong>FREE SHIPPING</strong>
-                      </>
-                    )}
+                    <strong>🎉 You qualify for FREE SHIPPING on all orders!</strong>
                   </span>
                 </div>
                 <div className="progress-bar-bg">
                   <div
                     className="progress-bar-fill"
-                    style={{ width: `${progressPercent}%` }}
+                    style={{ width: '100%' }}
                   ></div>
                 </div>
               </div>

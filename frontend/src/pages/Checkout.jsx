@@ -171,17 +171,15 @@ const Checkout = () => {
     setAppliedPromo(null);
   };
 
-  // Calculations
-  const isFreeShipping = cartSubtotal >= FREE_SHIPPING_THRESHOLD;
-  const standardShippingCost = isFreeShipping ? 0 : 99;
-  const shippingCost = shippingMethod === 'standard' ? standardShippingCost : 199;
+  // Calculations - 100% FREE SHIPPING ON ALL ORDERS
+  const shippingCost = 0;
 
   const discountAmount = appliedPromo 
     ? (appliedPromo.type === 'percentage' 
         ? (cartSubtotal * (appliedPromo.value / 100)) 
         : appliedPromo.value)
     : 0;
-  const grandTotal = cartSubtotal + shippingCost - discountAmount;
+  const grandTotal = Math.max(0, cartSubtotal - discountAmount);
 
   // Formatter helper
   const formatPrice = (price) => {
@@ -770,10 +768,10 @@ const Checkout = () => {
                           <FiTruck className="method-icon-left" />
                           <div className="method-info">
                             <span className="method-name">Standard Shipping</span>
-                            <span className="method-sub">Free shipping on orders above {formatPrice(FREE_SHIPPING_THRESHOLD)}</span>
+                            <span className="method-sub">100% Free delivery on all orders across India</span>
                           </div>
-                          <span className="method-price-label">
-                            {standardShippingCost === 0 ? 'FREE' : formatPrice(standardShippingCost)}
+                          <span className="method-price-label" style={{ color: '#d4a359', fontWeight: '800' }}>
+                            FREE
                           </span>
                         </div>
                         <span className="delivery-timeline">5-7 business days</span>
@@ -798,9 +796,9 @@ const Checkout = () => {
                           <span className="method-icon-left">⚡</span>
                           <div className="method-info">
                             <span className="method-name">Express Shipping</span>
-                            <span className="method-sub">Get your order faster</span>
+                            <span className="method-sub">Priority dispatch & fast delivery</span>
                           </div>
-                          <span className="method-price-label">{formatPrice(199)}</span>
+                          <span className="method-price-label" style={{ color: '#d4a359', fontWeight: '800' }}>FREE</span>
                         </div>
                         <span className="delivery-timeline">2-3 business days</span>
                       </label>

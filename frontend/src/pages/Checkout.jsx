@@ -243,13 +243,15 @@ const Checkout = () => {
         postalCode: pincode,
         country: 'India',
       },
-      paymentMethod: paymentMethod === 'razorpay'
-        ? `Razorpay Gateway (${txnId})`
-        : (paymentMethod === 'upi' ? `UPI Scanner (Ref: ${txnId})` : 'Cash on Delivery (COD)'),
+      paymentMethod: paymentMethod === 'phonepe'
+        ? `PhonePe Business (${txnId})`
+        : (paymentMethod === 'razorpay'
+            ? `Razorpay Gateway (${txnId})`
+            : (paymentMethod === 'upi' ? `UPI Scanner (Ref: ${txnId})` : 'Cash on Delivery (COD)')),
       upiTxnId: txnId || undefined,
       totalPrice: grandTotal,
-      isPaid: paymentMethod === 'upi' || paymentMethod === 'razorpay',
-      paidAt: (paymentMethod === 'upi' || paymentMethod === 'razorpay') ? new Date().toISOString() : undefined,
+      isPaid: paymentMethod === 'upi' || paymentMethod === 'razorpay' || paymentMethod === 'phonepe',
+      paidAt: (paymentMethod === 'upi' || paymentMethod === 'razorpay' || paymentMethod === 'phonepe') ? new Date().toISOString() : undefined,
     };
 
     setOrderLoading(true);
@@ -291,6 +293,99 @@ const Checkout = () => {
     } finally {
       setOrderLoading(false);
     }
+  };
+
+  // Place Order submission
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      const firstErrorKey = Object.keys(formErrors)[0];
+      const errorElement = document.getElementsByName(firstErrorKey)[0];
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        errorElement.focus();
+      }
+      return;
+    }
+
+    if (paymentMethod === 'phonepe') {
+      setOrderLoading(true);
+      try {
+        const { data } = await api.post('/payment/phonepe/pay', {
+          amount: grandTotal,
+          redirectUrl: `${window.location.origin}/order-success`
+        });
+        if (data && data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        } else {
+          alert('PhonePe payment initiation failed.');
+          setOrderLoading(false);
+        }
+      } catch (pErr) {
+        console.error('PhonePe PG Error:', pErr);
+        alert(pErr.response?.data?.message || 'PhonePe Business PG keys are not configured in backend .env. Please add PhonePe keys or use UPI Scanner / Razorpay.');
+        setOrderLoading(false);
+      }
+      return;
+    }
+
+    if (paymentMethod === 'razorpay') {
+      setOrderLoading(true);
+      try {
+        const { data } = await api.post('/payment/razorpay/order', { amount: grandTotal });
+        const options = {
+          key: data.keyId,
+          amount: data.amount,
+          currency: data.currency,
+          name: 'UNICORN ONYX',
+          description: 'Order Payment',
+          order_id: data.id,
+          prefill: {
+            name: fullName,
+            email: email,
+            contact: phone
+          },
+          theme: {
+            color: '#d4a359'
+          },
+          handler: async (response) => {
+            try {
+              const verifyRes = await api.post('/payment/razorpay/verify', {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              });
+              if (verifyRes.data && verifyRes.data.success) {
+                await executePlaceOrder(response.razorpay_payment_id);
+              }
+            } catch (vErr) {
+              alert('Payment Verification Failed: Invalid signature!');
+              setOrderLoading(false);
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              setOrderLoading(false);
+            }
+          }
+        };
+
+        if (window.Razorpay) {
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+        } else {
+          alert('Razorpay Checkout library loading. Please try again in a moment.');
+          setOrderLoading(false);
+        }
+      } catch (err) {
+        console.error('Razorpay Order Error:', err);
+        alert(err.response?.data?.message || 'Razorpay Gateway is currently not active. Please use UPI Scanner or PhonePe.');
+        setOrderLoading(false);
+      }
+      return;
+    }
+
+    await executePlaceOrder();
   };
 
   if (authLoading) {

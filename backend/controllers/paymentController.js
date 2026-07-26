@@ -1,12 +1,163 @@
 const crypto = require('crypto');
 const https = require('https');
 
-// @desc    Create Razorpay Order for Checkout
-// @route   POST /api/payment/razorpay/order
-// @access  Private
+// ==========================================
+// PhonePe Business Payment Gateway Controller
+// ==========================================
+
+const createPhonePePayment = async (req, res) => {
+  try {
+    const { amount, redirectUrl } = req.body;
+
+    const merchantId = process.env.PHONEPE_MERCHANT_ID;
+    const saltKey = process.env.PHONEPE_SALT_KEY;
+    const saltIndex = process.env.PHONEPE_SALT_INDEX || '1';
+    const isProd = process.env.PHONEPE_ENV === 'production';
+
+    if (!merchantId || !saltKey) {
+      return res.status(400).json({ message: 'PhonePe Merchant ID and Salt Key are not configured in backend .env' });
+    }
+
+    const merchantTransactionId = `MT${Date.now()}`;
+    const amountInPaise = Math.round(amount * 100);
+
+    const payload = {
+      merchantId: merchantId,
+      merchantTransactionId: merchantTransactionId,
+      merchantUserId: req.user?._id?.toString() || `USER_${Date.now()}`,
+      amount: amountInPaise,
+      redirectUrl: redirectUrl || `${process.env.FRONTEND_URL || 'https://www.unicornonyx.com'}/order-success`,
+      redirectMode: 'POST',
+      callbackUrl: `${process.env.BACKEND_URL || 'https://unicorn-ln99.onrender.com'}/api/payment/phonepe/callback`,
+      paymentInstrument: {
+        type: 'PAY_PAGE'
+      }
+    };
+
+    const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
+    const apiPath = '/pg/v1/pay';
+    const stringToHash = base64Payload + apiPath + saltKey;
+    const sha256 = crypto.createHash('sha256').update(stringToHash).digest('hex');
+    const checksum = `${sha256}###${saltIndex}`;
+
+    const hostname = isProd ? 'api.phonepe.com' : 'api-preprod.phonepe.com';
+    const path = isProd ? '/apis/hermes/pg/v1/pay' : '/apis/pg-sandbox/pg/v1/pay';
+
+    const postData = JSON.stringify({ request: base64Payload });
+
+    const options = {
+      hostname: hostname,
+      port: 443,
+      path: path,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+        'X-VERIFY': checksum
+      }
+    };
+
+    const request = https.request(options, (response) => {
+      let body = '';
+      response.on('data', (chunk) => body += chunk);
+      response.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          if (data.success && data.data?.instrumentResponse?.redirectInfo?.url) {
+            return res.status(200).json({
+              success: true,
+              redirectUrl: data.data.instrumentResponse.redirectInfo.url,
+              merchantTransactionId: merchantTransactionId
+            });
+          } else {
+            console.error('PhonePe API Error:', data);
+            return res.status(400).json({ message: data.message || 'PhonePe payment initialization failed' });
+          }
+        } catch (e) {
+          return res.status(500).json({ message: 'Failed to parse PhonePe response' });
+        }
+      });
+    });
+
+    request.on('error', (err) => {
+      console.error('PhonePe Request Error:', err);
+      return res.status(500).json({ message: 'Network error connecting to PhonePe API' });
+    });
+
+    request.write(postData);
+    request.end();
+  } catch (error) {
+    console.error('PhonePe Controller Error:', error);
+    res.status(500).json({ message: 'Server error creating PhonePe payment' });
+  }
+};
+
+const checkPhonePeStatus = async (req, res) => {
+  try {
+    const { merchantTransactionId } = req.params;
+    const merchantId = process.env.PHONEPE_MERCHANT_ID;
+    const saltKey = process.env.PHONEPE_SALT_KEY;
+    const saltIndex = process.env.PHONEPE_SALT_INDEX || '1';
+    const isProd = process.env.PHONEPE_ENV === 'production';
+
+    if (!merchantId || !saltKey) {
+      return res.status(400).json({ message: 'PhonePe keys not configured' });
+    }
+
+    const apiPath = `/pg/v1/status/${merchantId}/${merchantTransactionId}`;
+    const stringToHash = apiPath + saltKey;
+    const sha256 = crypto.createHash('sha256').update(stringToHash).digest('hex');
+    const checksum = `${sha256}###${saltIndex}`;
+
+    const hostname = isProd ? 'api.phonepe.com' : 'api-preprod.phonepe.com';
+    const path = isProd ? `/apis/hermes${apiPath}` : `/apis/pg-sandbox${apiPath}`;
+
+    const options = {
+      hostname: hostname,
+      port: 443,
+      path: path,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-VERIFY': checksum,
+        'X-MERCHANT-ID': merchantId
+      }
+    };
+
+    const request = https.request(options, (response) => {
+      let body = '';
+      response.on('data', (chunk) => body += chunk);
+      response.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          if (data.success && data.code === 'PAYMENT_SUCCESS') {
+            return res.status(200).json({ success: true, code: 'PAYMENT_SUCCESS', message: 'Payment verified by PhonePe' });
+          } else {
+            return res.status(200).json({ success: false, code: data.code, message: data.message });
+          }
+        } catch (e) {
+          return res.status(500).json({ message: 'Error parsing PhonePe status response' });
+        }
+      });
+    });
+
+    request.on('error', (err) => {
+      return res.status(500).json({ message: 'Error checking PhonePe status' });
+    });
+
+    request.end();
+  } catch (error) {
+    res.status(500).json({ message: 'Server error checking PhonePe payment status' });
+  }
+};
+
+// ==========================================
+// Razorpay Payment Gateway Controller
+// ==========================================
+
 const createRazorpayOrder = async (req, res) => {
   try {
-    const { amount } = req.body; // Amount in INR
+    const { amount } = req.body;
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: 'Invalid payment amount' });
     }
@@ -77,9 +228,6 @@ const createRazorpayOrder = async (req, res) => {
   }
 };
 
-// @desc    Verify Razorpay Payment Signature
-// @route   POST /api/payment/razorpay/verify
-// @access  Private
 const verifyRazorpayPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -113,4 +261,9 @@ const verifyRazorpayPayment = async (req, res) => {
   }
 };
 
-module.exports = { createRazorpayOrder, verifyRazorpayPayment };
+module.exports = {
+  createPhonePePayment,
+  checkPhonePeStatus,
+  createRazorpayOrder,
+  verifyRazorpayPayment
+};

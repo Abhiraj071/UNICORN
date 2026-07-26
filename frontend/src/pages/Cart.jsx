@@ -19,7 +19,6 @@ import { useCart } from '../context/CartContext';
 import './Cart.css';
 
 const FREE_SHIPPING_THRESHOLD = 0;
-const DISCOUNT_PERCENT = 10; // 10% auto-applied discount matching the mockup
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -62,10 +61,10 @@ const Cart = () => {
     }).format(price);
   };
 
-  // Calculations (FREE SHIPPING ON ALL ORDERS)
+  // Calculations (FREE SHIPPING ON ALL ORDERS, NO HARDCODED AUTO-DISCOUNT)
   const shippingCost = 0;
-  const discountAmount = (cartSubtotal * DISCOUNT_PERCENT) / 100;
-  const grandTotal = Math.max(0, cartSubtotal - discountAmount);
+  const discountAmount = 0;
+  const grandTotal = cartSubtotal;
 
   // Free shipping progress bar
   const amountAway = 0;
@@ -215,10 +214,12 @@ const Cart = () => {
                     </span>
                   </div>
 
-                  <div className="summary-row discount-row">
-                    <span className="row-label">Discount</span>
-                    <span className="row-value discount-value">-{formatPrice(discountAmount)}</span>
-                  </div>
+                  {discountAmount > 0 && (
+                    <div className="summary-row discount-row">
+                      <span className="row-label">Discount</span>
+                      <span className="row-value discount-value">-{formatPrice(discountAmount)}</span>
+                    </div>
+                  )}
 
                   <div className="summary-divider"></div>
 

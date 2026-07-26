@@ -219,6 +219,9 @@ const AdminDashboard = () => {
   const [formStock, setFormStock] = useState('20');
   const [formFeatured, setFormFeatured] = useState(false);
   const [formLimited, setFormLimited] = useState(false);
+  const [formIsPreOrder, setFormIsPreOrder] = useState(false);
+  const [formPreOrderDate, setFormPreOrderDate] = useState('');
+  const [formPreOrderNote, setFormPreOrderNote] = useState('');
   const [formFabric, setFormFabric] = useState('100% Premium Heavyweight Cotton');
   const [formGsm, setFormGsm] = useState('240');
   const [formFit, setFormFit] = useState('Oversized Boxy Fit');
@@ -598,10 +601,13 @@ const AdminDashboard = () => {
       category: formCategory,
       collectionName: formCollection,
       brand: formBrand,
-      badge: formBadge || null,
+      badge: formIsPreOrder ? 'PRE-ORDER' : (formBadge || null),
       countInStock: Number(formStock),
       featured: formFeatured,
       limited: formLimited,
+      isPreOrder: formIsPreOrder,
+      preOrderReleaseDate: formIsPreOrder ? formPreOrderDate : '',
+      preOrderNote: formIsPreOrder ? formPreOrderNote : '',
       fabric: formFabric,
       gsm: formGsm ? Number(formGsm) : null,
       fit: formFit,
@@ -873,6 +879,9 @@ const AdminDashboard = () => {
     setFormStock('20');
     setFormFeatured(false);
     setFormLimited(false);
+    setFormIsPreOrder(false);
+    setFormPreOrderDate('');
+    setFormPreOrderNote('');
     setFormFabric('100% Premium Heavyweight Cotton');
     setFormGsm('240');
     setFormFit('Oversized Boxy Fit');
@@ -905,6 +914,9 @@ const AdminDashboard = () => {
     setFormStock(p.countInStock || '0');
     setFormFeatured(!!p.featured);
     setFormLimited(!!p.limited);
+    setFormIsPreOrder(!!p.isPreOrder);
+    setFormPreOrderDate(p.preOrderReleaseDate || '');
+    setFormPreOrderNote(p.preOrderNote || '');
     setFormFabric(p.fabric || '');
     setFormGsm(p.gsm || '');
     setFormFit(p.fit || '');
@@ -3857,6 +3869,53 @@ const AdminDashboard = () => {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Pre-Order Section */}
+                <div className="modal-sub-section" style={{ border: '1px solid rgba(212, 163, 89, 0.35)', padding: '1.25rem', borderRadius: '10px', backgroundColor: 'rgba(212, 163, 89, 0.04)', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                    <input
+                      type="checkbox"
+                      id="modal-is-preorder"
+                      checked={formIsPreOrder}
+                      onChange={(e) => setFormIsPreOrder(e.target.checked)}
+                      style={{ width: '18px', height: '18px', accentColor: '#d4a359', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="modal-is-preorder" style={{ fontWeight: '700', color: '#d4a359', cursor: 'pointer', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                      ⏳ Enable Pre-Order For This Product
+                    </label>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#999', display: 'block', marginBottom: '0.75rem' }}>
+                    Check this option if this product is available for advance pre-order prior to official stock release.
+                  </span>
+
+                  {formIsPreOrder && (
+                    <div className="grid-2-col" style={{ marginTop: '0.75rem' }}>
+                      <div className="form-group-field">
+                        <label style={{ color: '#d4a359', fontWeight: '600' }}>Estimated Dispatch / Release Date *</label>
+                        <input
+                          type="text"
+                          value={formPreOrderDate}
+                          onChange={(e) => setFormPreOrderDate(e.target.value)}
+                          placeholder="e.g. 15 August 2026 or Dispatch in 2 weeks"
+                          className="gothic-input"
+                          style={{ borderColor: 'rgba(212, 163, 89, 0.5)' }}
+                          required={formIsPreOrder}
+                        />
+                      </div>
+                      <div className="form-group-field">
+                        <label style={{ color: '#d4a359', fontWeight: '600' }}>Pre-Order Note / Custom Instructions</label>
+                        <input
+                          type="text"
+                          value={formPreOrderNote}
+                          onChange={(e) => setFormPreOrderNote(e.target.value)}
+                          placeholder="e.g. Limited Batch Pre-Order • Ships on release"
+                          className="gothic-input"
+                          style={{ borderColor: 'rgba(212, 163, 89, 0.5)' }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Inventory block */}

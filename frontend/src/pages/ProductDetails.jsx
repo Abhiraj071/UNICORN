@@ -315,12 +315,43 @@ const ProductDetails = () => {
               )}
             </div>
 
+            {/* Pre-Order Banner Notification */}
+            {product.isPreOrder && (
+              <div className="preorder-banner-box" style={{
+                background: 'linear-gradient(135deg, rgba(212, 163, 89, 0.15), rgba(212, 163, 89, 0.05))',
+                border: '1px solid #d4a359',
+                borderRadius: '10px',
+                padding: '1rem 1.25rem',
+                margin: '1.25rem 0',
+                color: '#d4a359'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '700', fontSize: '1.05rem', letterSpacing: '0.5px' }}>
+                  <span>⏳ EXCLUSIVE PRE-ORDER</span>
+                </div>
+                <p style={{ margin: '0.4rem 0 0 0', color: '#e0e0e0', fontSize: '0.88rem', lineHeight: '1.4' }}>
+                  {product.preOrderNote || 'Reserve your item now prior to official stock release.'}
+                  {product.preOrderReleaseDate && (
+                    <strong style={{ display: 'block', marginTop: '0.4rem', color: '#d4a359', fontSize: '0.92rem' }}>
+                      📦 Estimated Shipping / Release Date: {product.preOrderReleaseDate}
+                    </strong>
+                  )}
+                </p>
+              </div>
+            )}
+
             {/* Stock status indicator */}
             <div className="stock-status-wrapper">
-              <span className="status-green-dot"></span>
+              <span className="status-green-dot" style={{ backgroundColor: product.isPreOrder ? '#d4a359' : undefined }}></span>
               <div className="status-texts">
-                <span className="status-title">In Stock</span>
-                <span className="status-sub">Ready to ship ({product.countInStock || 10} available)</span>
+                <span className="status-title" style={{ color: product.isPreOrder ? '#d4a359' : undefined }}>
+                  {product.isPreOrder ? 'PRE-ORDER OPEN' : 'In Stock'}
+                </span>
+                <span className="status-sub">
+                  {product.isPreOrder 
+                    ? `Ships on ${product.preOrderReleaseDate || 'official release date'}`
+                    : `Ready to ship (${product.countInStock || 10} available)`
+                  }
+                </span>
               </div>
             </div>
 
@@ -394,24 +425,25 @@ const ProductDetails = () => {
               >
                 {buttonState === 'idle' && (
                   <>
-                    <FiShoppingBag className="btn-icon-pad" /> ADD TO CART
+                    <FiShoppingBag className="btn-icon-pad" /> {product.isPreOrder ? 'PRE-ORDER NOW' : 'ADD TO CART'}
                   </>
                 )}
                 {buttonState === 'adding' && (
-                  <span className="button-loading-text">ADDING...</span>
+                  <span className="button-loading-text">{product.isPreOrder ? 'RESERVING...' : 'ADDING...'}</span>
                 )}
                 {buttonState === 'added' && (
-                  <span className="button-success-text">✓ ADDED!</span>
+                  <span className="button-success-text">{product.isPreOrder ? '✓ PRE-ORDERED!' : '✓ ADDED!'}</span>
                 )}
               </button>
               <button
                 className="buy-now-btn"
+                style={product.isPreOrder ? { background: 'linear-gradient(135deg, #d4a359, #b8860b)', color: '#000', fontWeight: '800' } : undefined}
                 onClick={() => {
                   addToCart(product, selectedSize, quantity);
                   navigate('/cart');
                 }}
               >
-                ⚡ BUY IT NOW
+                {product.isPreOrder ? '⏳ INSTANT PRE-ORDER' : '⚡ BUY IT NOW'}
               </button>
             </div>
 

@@ -27,6 +27,9 @@ const productSchema = new mongoose.Schema({
   gallery: [{ type: String }],
   description: { type: String, required: true },
   features: [{ type: String }],
+  isPreOrder: { type: Boolean, default: false },
+  preOrderReleaseDate: { type: String, default: '' },
+  preOrderNote: { type: String, default: '' },
 }, {
   timestamps: true
 });

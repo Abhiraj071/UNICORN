@@ -527,9 +527,12 @@ const Shop = () => {
                         <Link to={`/product/${product._id}`} key={product._id} className="product-card">
                           <div className="card-image-container">
                             {/* Product Badges */}
-                            {product.badge && (
-                              <span className={`product-badge badge-${product.badge.toLowerCase().replace(' ', '-')}`}>
-                                {product.badge}
+                            {(product.isPreOrder || product.badge) && (
+                              <span
+                                className={`product-badge ${product.isPreOrder ? 'badge-pre-order' : `badge-${(product.badge || '').toLowerCase().replace(' ', '-')}`}`}
+                                style={product.isPreOrder ? { backgroundColor: '#d4a359', color: '#000', fontWeight: '800' } : undefined}
+                              >
+                                {product.isPreOrder ? 'PRE-ORDER' : product.badge}
                               </span>
                             )}
                             

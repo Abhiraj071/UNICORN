@@ -46,7 +46,10 @@ const createProduct = async (req, res) => {
       image,
       gallery,
       description,
-      features
+      features,
+      isPreOrder,
+      preOrderReleaseDate,
+      preOrderNote
     } = req.body;
 
     // Generate unique id and slug
@@ -65,7 +68,7 @@ const createProduct = async (req, res) => {
       brand: brand || 'UNICORN',
       price: Number(price),
       comparePrice: comparePrice ? Number(comparePrice) : undefined,
-      badge,
+      badge: isPreOrder ? 'PRE-ORDER' : badge,
       sku,
       countInStock: Number(countInStock) || 0,
       featured: !!featured,
@@ -79,7 +82,10 @@ const createProduct = async (req, res) => {
       image,
       gallery: Array.isArray(gallery) ? gallery : [],
       description,
-      features: Array.isArray(features) ? features : []
+      features: Array.isArray(features) ? features : [],
+      isPreOrder: !!isPreOrder,
+      preOrderReleaseDate: preOrderReleaseDate || '',
+      preOrderNote: preOrderNote || ''
     });
 
     const createdProduct = await product.save();
@@ -115,7 +121,10 @@ const updateProduct = async (req, res) => {
       image,
       gallery,
       description,
-      features
+      features,
+      isPreOrder,
+      preOrderReleaseDate,
+      preOrderNote
     } = req.body;
 
     const product = await Product.findById(req.params.id);
@@ -131,7 +140,7 @@ const updateProduct = async (req, res) => {
       product.category = category || product.category;
       product.collectionName = collectionName || product.collectionName;
       product.brand = brand || product.brand;
-      product.badge = badge !== undefined ? badge : product.badge;
+      product.badge = isPreOrder ? 'PRE-ORDER' : (badge !== undefined ? badge : product.badge);
       product.countInStock = countInStock !== undefined ? Number(countInStock) : product.countInStock;
       product.featured = featured !== undefined ? !!featured : product.featured;
       product.limited = limited !== undefined ? !!limited : product.limited;
@@ -145,6 +154,9 @@ const updateProduct = async (req, res) => {
       product.gallery = Array.isArray(gallery) ? gallery : product.gallery;
       product.description = description || product.description;
       product.features = Array.isArray(features) ? features : product.features;
+      product.isPreOrder = isPreOrder !== undefined ? !!isPreOrder : product.isPreOrder;
+      product.preOrderReleaseDate = preOrderReleaseDate !== undefined ? preOrderReleaseDate : product.preOrderReleaseDate;
+      product.preOrderNote = preOrderNote !== undefined ? preOrderNote : product.preOrderNote;
 
       const updatedProduct = await product.save();
       res.json(updatedProduct);

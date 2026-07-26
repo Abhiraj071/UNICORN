@@ -45,13 +45,21 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-// Serve static upload files
+// Serve static upload & image files
 app.use('/api/uploads', express.static(uploadsDir));
+const publicImagesDir = path.join(__dirname, '../frontend/public/images');
+const distImagesDir = path.join(__dirname, '../frontend/dist/images');
+if (fs.existsSync(publicImagesDir)) {
+  app.use('/images', express.static(publicImagesDir));
+}
+if (fs.existsSync(distImagesDir)) {
+  app.use('/images', express.static(distImagesDir));
+}
 
 app.get('/', (req, res) => {
   res.json({ status: 'success', message: 'Unicorn Store API is running cleanly on Render' });

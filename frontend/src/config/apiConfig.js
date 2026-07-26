@@ -37,7 +37,10 @@ export const getImageUrl = (imagePath) => {
     return imagePath;
   }
   
-  const defaultBackend = 'https://unicorn-ln99.onrender.com';
+  const isLocalhost = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  const defaultBackend = isLocalhost ? '' : 'https://unicorn-ln99.onrender.com';
   let backendHost = defaultBackend;
   if (API_BASE_URL && API_BASE_URL.startsWith('http')) {
     backendHost = API_BASE_URL.replace(/\/api\/?$/, '');
@@ -45,11 +48,11 @@ export const getImageUrl = (imagePath) => {
 
   if (imagePath.includes('/uploads/')) {
     const uploadSubpath = imagePath.substring(imagePath.indexOf('/uploads/'));
-    return `${backendHost}/api${uploadSubpath}`;
+    return backendHost ? `${backendHost}/api${uploadSubpath}` : `/api${uploadSubpath}`;
   }
   
   if (imagePath.startsWith('uploads/')) {
-    return `${backendHost}/api/${imagePath}`;
+    return backendHost ? `${backendHost}/api/${imagePath}` : `/api/${imagePath}`;
   }
 
   if (!imagePath.startsWith('/')) {

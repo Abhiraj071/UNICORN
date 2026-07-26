@@ -421,13 +421,44 @@ const AdminDashboard = () => {
     }
   };
 
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
+  const compressImageToBase64 = (file, maxWidth = 1200, quality = 0.82) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const dataUrl = canvas.toDataURL('image/webp', quality);
+            resolve(dataUrl);
+          } catch (e) {
+            resolve(event.target.result);
+          }
+        };
+        img.onerror = () => resolve(event.target.result);
+      };
+      reader.onerror = () => resolve(null);
     });
+  };
+
+  const convertFileToBase64 = (file) => {
+    return compressImageToBase64(file);
   };
 
   const handleImageUpload = async (e) => {
@@ -445,24 +476,8 @@ const AdminDashboard = () => {
         setUploadCurrent(i + 1);
         const file = files[i];
 
-        let finalUrl = null;
-
-        // Attempt 1: Try backend upload API
-        try {
-          const formData = new FormData();
-          formData.append('image', file);
-          const { data } = await api.post('/upload', formData);
-          if (data && data.image) {
-            finalUrl = getImageUrl(data.image);
-          }
-        } catch (uploadErr) {
-          console.warn('Backend upload API error, converting to Base64:', uploadErr);
-        }
-
-        // Attempt 2: Fallback to Base64 Data URL so uploaded image NEVER breaks
-        if (!finalUrl) {
-          finalUrl = await convertFileToBase64(file);
-        }
+        // Compress file to permanent WebP Base64 Data URL so uploaded product images never break on Render/MilesWeb
+        const finalUrl = await compressImageToBase64(file);
 
         if (finalUrl) {
           uploadedUrls.push(finalUrl);

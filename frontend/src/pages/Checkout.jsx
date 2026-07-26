@@ -216,29 +216,26 @@ const Checkout = () => {
     dateEnd.setDate(dateEnd.getDate() + 7);
 
     return `${dateStart.getDate()} ${months[dateStart.getMonth()]} – ${dateEnd.getDate()} ${months[dateEnd.getMonth()]} ${dateEnd.getFullYear()}`;
-  };
-
-  // Place Order submission
-  const handlePlaceOrder = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      // Scroll to the first error
-      const firstErrorKey = Object.keys(formErrors)[0];
-      const errorElement = document.getElementsByName(firstErrorKey)[0];
-      if (errorElement) {
-        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        errorElement.focus();
-      }
-      return;
+  };  // Load Razorpay Script dynamically
+  useEffect(() => {
+    if (!document.getElementById('razorpay-script')) {
+      const script = document.createElement('script');
+      script.id = 'razorpay-script';
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      document.body.appendChild(script);
     }
+  }, []);
 
+  const executePlaceOrder = async (confirmedPaymentId) => {
+    const txnId = confirmedPaymentId || (upiTxnId ? upiTxnId.trim() : '');
     const orderData = {
       orderItems: cartItems.map(item => ({
         name: item.name,
         qty: item.qty,
         image: item.image,
         price: item.price,
-        product: item._id, // product ObjectId
+        product: item._id,
       })),
       shippingAddress: {
         address: `${address1}${address2 ? ', ' + address2 : ''}`,
@@ -246,11 +243,13 @@ const Checkout = () => {
         postalCode: pincode,
         country: 'India',
       },
-      paymentMethod: paymentMethod === 'upi' ? `UPI Scanner (Ref: ${upiTxnId.trim()})` : 'Cash on Delivery (COD)',
-      upiTxnId: paymentMethod === 'upi' ? upiTxnId.trim() : undefined,
+      paymentMethod: paymentMethod === 'razorpay'
+        ? `Razorpay Gateway (${txnId})`
+        : (paymentMethod === 'upi' ? `UPI Scanner (Ref: ${txnId})` : 'Cash on Delivery (COD)'),
+      upiTxnId: txnId || undefined,
       totalPrice: grandTotal,
-      isPaid: paymentMethod === 'upi',
-      paidAt: paymentMethod === 'upi' ? new Date().toISOString() : undefined,
+      isPaid: paymentMethod === 'upi' || paymentMethod === 'razorpay',
+      paidAt: (paymentMethod === 'upi' || paymentMethod === 'razorpay') ? new Date().toISOString() : undefined,
     };
 
     setOrderLoading(true);
@@ -266,8 +265,11 @@ const Checkout = () => {
         subtotal: cartSubtotal,
         shipping: shippingCost,
         discount: discountAmount,
-        total: grandTotal,
+        grandTotal: grandTotal,
         paymentMethod: orderData.paymentMethod,
+        shippingAddress: `${fullName}, ${address1}, ${address2 ? address2 + ', ' : ''}${city}, ${selectedState} - ${pincode}`,
+        phone: phone,
+        email: email,
         shippingMethodText: shippingMethod === 'standard' ? 'Free Shipping' : 'Express Shipping',
         fullName: fullName,
         email: email,
@@ -924,6 +926,35 @@ const Checkout = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Instant Bank Verified Gateway Option */}
+                    <div
+                      className={`payment-option-row ${paymentMethod === 'razorpay' ? 'selected-payment-row' : ''}`}
+                      onClick={() => setPaymentMethod('razorpay')}
+                    >
+                      <input
+                        type="radio"
+                        id="pay-razorpay"
+                        name="paymentMethod"
+                        checked={paymentMethod === 'razorpay'}
+                        onChange={() => setPaymentMethod('razorpay')}
+                        className="payment-radio-input"
+                      />
+                      <label htmlFor="pay-razorpay" className="payment-label-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="payment-meta-info">
+                          <span className="payment-icon-symbol">⚡</span>
+                          <div className="payment-texts-column">
+                            <span className="payment-method-title">Instant Payment Gateway (Automated Bank Verification)</span>
+                            <span className="payment-method-desc">Instant Bank Verification • GPay, PhonePe, Paytm, Cards, NetBanking</span>
+                          </div>
+                        </div>
+                        <div className="payment-brand-logos">
+                          <span className="brand-pill gpay">Razorpay</span>
+                          <span className="brand-pill phonepe">PhonePe</span>
+                          <span className="brand-pill paytm">Paytm</span>
+                        </div>
+                      </label>
+                    </div>
 
                     {/* Cash on Delivery */}
                     <div

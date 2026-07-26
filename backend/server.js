@@ -78,6 +78,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const faqRoutes = require('./routes/faqRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -87,6 +88,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/faqs', faqRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/payment', paymentRoutes);
 // Serve static frontend files in production
 if (process.env.NODE_ENV === 'production') {
   const distPath = path.join(__dirname, '../frontend/dist');

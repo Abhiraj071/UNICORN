@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../config/apiConfig';
+import { getApiUrl, getImageUrl } from '../config/apiConfig';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { 
   FiHeart, 
@@ -548,9 +548,13 @@ const Shop = () => {
 
                             {/* Product Image */}
                             <img 
-                              src={product.image} 
+                              src={getImageUrl(product.image)} 
                               alt={product.name} 
                               className="product-image"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '/images/1.png';
+                              }}
                             />
                           </div>
 

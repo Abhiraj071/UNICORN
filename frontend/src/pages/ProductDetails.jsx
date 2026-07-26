@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../config/apiConfig';
+import { getApiUrl, getImageUrl } from '../config/apiConfig';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   FiHeart, 
@@ -224,7 +224,11 @@ const ProductDetails = () => {
                   className={`thumbnail-box ${activeImage === imgUrl ? 'active-thumbnail' : ''}`}
                   onClick={() => setActiveImage(imgUrl)}
                 >
-                  <img src={imgUrl} alt={`${product.name} thumbnail ${idx + 1}`} />
+                  <img 
+                    src={getImageUrl(imgUrl)} 
+                    alt={`${product.name} thumbnail ${idx + 1}`} 
+                    onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                  />
                 </div>
               ))}
             </div>
@@ -234,7 +238,12 @@ const ProductDetails = () => {
               <button className="expand-view-btn" title="View Fullscreen">
                 <FiMaximize2 size={16} />
               </button>
-              <img src={activeImage} alt={product.name} className="main-active-image" />
+              <img 
+                src={getImageUrl(activeImage)} 
+                alt={product.name} 
+                className="main-active-image" 
+                onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+              />
             </div>
           </div>
 

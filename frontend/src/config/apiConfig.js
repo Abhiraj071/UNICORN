@@ -22,3 +22,23 @@ export const getApiUrl = (endpoint) => {
   
   return `${cleanBase}${path}`;
 };
+
+/**
+ * Resolves product image URLs (handling local static images, backend uploads, and fallback on error)
+ */
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return '/images/1.png';
+  if (typeof imagePath !== 'string') return '/images/1.png';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  
+  if (imagePath.startsWith('/uploads/') || imagePath.startsWith('uploads/')) {
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    const backendBase = API_BASE_URL.replace(/\/api\/?$/, '');
+    return `${backendBase}/api${cleanPath}`;
+  }
+  
+  if (!imagePath.startsWith('/')) {
+    return `/${imagePath}`;
+  }
+  return imagePath;
+};

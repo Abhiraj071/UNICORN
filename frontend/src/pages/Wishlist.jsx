@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../config/apiConfig';
+import { getApiUrl, getImageUrl } from '../config/apiConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiHeart, FiShoppingBag, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
@@ -117,7 +117,12 @@ const Wishlist = () => {
                   {/* Card Thumbnail */}
                   <div className="wishlist-thumb-box" onClick={() => navigate(`/product/${item._id}`)}>
                     {item.badge && <span className="wishlist-badge">{item.badge}</span>}
-                    <img src={item.image} alt={item.name} className="wishlist-img" />
+                    <img 
+                      src={getImageUrl(item.image)} 
+                      alt={item.name} 
+                      className="wishlist-img" 
+                      onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                    />
                     
                     {/* Floating Delete button */}
                     <button 

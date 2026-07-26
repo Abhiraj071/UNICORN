@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiMail, FiArrowRight, FiShield, FiPlay, FiPause, FiVolume2, FiVolumeX, FiMusic } from 'react-icons/fi';
+import { useToast } from '../context/ToastContext';
 import './Community.css';
 
 const socialCards = [
@@ -221,9 +222,11 @@ const Community = () => {
     }
   };
 
+  const { toast } = useToast();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Thank you for joining the Inner Circle!');
+    toast.success('Thank you for joining the Inner Circle!');
   };
 
   const duration = audioRef.current ? audioRef.current.duration : 0;

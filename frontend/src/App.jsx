@@ -102,15 +102,19 @@ const MainContent = () => {
   );
 };
 
+import { ToastProvider } from './context/ToastContext';
+
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
-          <MainContent />
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <CartProvider>
+          <Router>
+            <MainContent />
+          </Router>
+        </CartProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

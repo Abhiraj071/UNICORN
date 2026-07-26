@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
-import { FiMail, FiArrowRight } from 'react-icons/fi';
+import { useToast } from '../context/ToastContext';
 import './Footer.css';
 
 const Footer = () => {
+  const { toast } = useToast();
+
   const handleSubscribe = (e) => {
     e.preventDefault();
-    alert('Thank you for subscribing to our newsletter!');
+    toast.success('Thank you for subscribing to our newsletter!');
   };
 
   return (

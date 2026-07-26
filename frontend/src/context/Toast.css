@@ -1,0 +1,280 @@
+/* Toast.css - UNICORN ONYX Modern Toast & Alert System */
+
+.toast-container {
+  position: fixed;
+  top: 85px;
+  right: 25px;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+  width: calc(100vw - 40px);
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 1rem 1.25rem;
+  background: rgba(10, 18, 13, 0.92);
+  border: 1px solid rgba(138, 184, 151, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 4px;
+  color: #f4f6f4;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 15px rgba(10, 18, 13, 0.5);
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+  font-family: 'Cinzel', 'Inter', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.toast-item.toast-leaving {
+  animation: toastSlideOut 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+@keyframes toastSlideOut {
+  to {
+    opacity: 0;
+    transform: translateX(50px) scale(0.9);
+  }
+}
+
+/* Toast Variants */
+.toast-item.toast-success {
+  border-color: rgba(46, 204, 113, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 20px rgba(46, 204, 113, 0.15);
+}
+.toast-item.toast-success .toast-icon {
+  color: #2ecc71;
+}
+
+.toast-item.toast-error {
+  border-color: rgba(231, 76, 60, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 20px rgba(231, 76, 60, 0.15);
+}
+.toast-item.toast-error .toast-icon {
+  color: #e74c3c;
+}
+
+.toast-item.toast-info {
+  border-color: rgba(212, 163, 89, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 20px rgba(212, 163, 89, 0.15);
+}
+.toast-item.toast-info .toast-icon {
+  color: #d4a359;
+}
+
+.toast-item.toast-warning {
+  border-color: rgba(241, 196, 15, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 20px rgba(241, 196, 15, 0.15);
+}
+.toast-item.toast-warning .toast-icon {
+  color: #f1c40f;
+}
+
+/* Toast Icon & Message */
+.toast-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toast-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toast-message {
+  font-size: 0.88rem;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
+  color: #e2e8e4;
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  color: #7b9e84;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  margin-left: 4px;
+}
+
+.toast-close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Bottom Progress Line */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.6;
+  width: 100%;
+  animation: toastProgress linear forwards;
+}
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* Modern Alert Modal Backdrop */
+.alert-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  background: rgba(4, 8, 6, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.25s ease forwards;
+}
+
+.alert-modal-card {
+  background: #09120c;
+  border: 1px solid rgba(138, 184, 151, 0.3);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), inset 0 0 30px rgba(138, 184, 151, 0.03);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 440px;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  font-family: 'Cinzel', serif;
+}
+
+@keyframes modalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.alert-modal-icon-wrapper {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 1.25rem auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  background: rgba(212, 163, 89, 0.1);
+  border: 1px solid rgba(212, 163, 89, 0.3);
+  color: #d4a359;
+}
+
+.alert-modal-icon-wrapper.success {
+  background: rgba(46, 204, 113, 0.1);
+  border-color: rgba(46, 204, 113, 0.3);
+  color: #2ecc71;
+}
+
+.alert-modal-icon-wrapper.error {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+}
+
+.alert-modal-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #f4f6f4;
+  margin: 0 0 0.75rem 0;
+}
+
+.alert-modal-message {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: #a3b8aa;
+  line-height: 1.55;
+  margin: 0 0 1.75rem 0;
+}
+
+.alert-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.alert-modal-btn-gold {
+  background: linear-gradient(135deg, #d4a359 0%, #b8863b 100%);
+  color: #050a07;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  padding: 0.75rem 1.8rem;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(212, 163, 89, 0.3);
+  text-transform: uppercase;
+}
+
+.alert-modal-btn-gold:hover {
+  background: linear-gradient(135deg, #fcedc5 0%, #c99849 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(212, 163, 89, 0.5);
+}
+
+.alert-modal-btn-cancel {
+  background: transparent;
+  color: #8ab897;
+  border: 1px solid rgba(138, 184, 151, 0.3);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  padding: 0.75rem 1.5rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.alert-modal-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: #8ab897;
+}

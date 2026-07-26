@@ -57,6 +57,7 @@ const MainContent = () => {
     sessionStorage.removeItem('unicorn_launch_preview');
     localStorage.removeItem('unicorn_launch_bypassed');
     setBypassedLaunch(false);
+    navigate('/launch');
   };
 
   const showNavAndFooter = !showLaunchCountdown && location.pathname !== '/login' && !location.pathname.startsWith('/admin');
@@ -99,7 +100,18 @@ const MainContent = () => {
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>
-      {showNavAndFooter && <Footer />}
+      {showNavAndFooter && (
+        <>
+          <Footer />
+          <button 
+            onClick={handleResetLaunch} 
+            className="floating-launch-badge"
+            title="Return to UNICORN ONYX Launch Countdown"
+          >
+            <span className="badge-diamond">◆</span> LAUNCH COUNTDOWN
+          </button>
+        </>
+      )}
     </>
   );
 };

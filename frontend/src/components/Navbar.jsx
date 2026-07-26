@@ -60,7 +60,6 @@ const Navbar = ({ showCompletionBanner }) => {
                 <Link to="/shop">Shop</Link>
                 <Link to="/collections">Collections</Link>
                 <Link to="/limited-drops" style={{ color: '#d4af37', fontWeight: '600' }}>Limited Drops</Link>
-                <Link to="/launch" style={{ color: '#8ab897', fontWeight: '500' }}>Launch</Link>
               </nav>
             </div>
           </div>

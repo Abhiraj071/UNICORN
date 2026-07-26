@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl, getImageUrl } from '../config/apiConfig';
+import { getApiUrl, getImageUrl, FALLBACK_IMAGE } from '../config/apiConfig';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { 
   FiHeart, 
@@ -553,7 +553,7 @@ const Shop = () => {
                               className="product-image"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = '/images/1.png';
+                                e.target.src = FALLBACK_IMAGE;
                               }}
                             />
                           </div>

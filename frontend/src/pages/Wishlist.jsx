@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl, getImageUrl } from '../config/apiConfig';
+import { getApiUrl, getImageUrl, FALLBACK_IMAGE } from '../config/apiConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiHeart, FiShoppingBag, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
@@ -121,7 +121,7 @@ const Wishlist = () => {
                       src={getImageUrl(item.image)} 
                       alt={item.name} 
                       className="wishlist-img" 
-                      onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                      onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMAGE; }}
                     />
                     
                     {/* Floating Delete button */}

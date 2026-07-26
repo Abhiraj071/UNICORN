@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl, getImageUrl } from '../config/apiConfig';
+import { getApiUrl, getImageUrl, FALLBACK_IMAGE } from '../config/apiConfig';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   FiHeart,
@@ -235,7 +235,7 @@ const ProductDetails = () => {
                   <img
                     src={getImageUrl(imgUrl)}
                     alt={`${product.name} thumbnail ${idx + 1}`}
-                    onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                    onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMAGE; }}
                   />
                 </div>
               ))}
@@ -250,7 +250,7 @@ const ProductDetails = () => {
                 src={getImageUrl(currentActiveImage)}
                 alt={product.name}
                 className="main-active-image"
-                onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMAGE; }}
               />
             </div>
           </div>

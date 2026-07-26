@@ -23,12 +23,14 @@ export const getApiUrl = (endpoint) => {
   return `${cleanBase}${path}`;
 };
 
+export const FALLBACK_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500"><rect width="400" height="500" fill="%230c140e"/><path d="M200 180 L230 230 L280 230 L240 265 L255 315 L200 280 L145 315 L160 265 L120 230 L170 230 Z" fill="%23d4a359" opacity="0.45"/><text x="50%" y="74%" font-family="Cinzel, serif" font-size="16" fill="%238ab897" text-anchor="middle" letter-spacing="4">UNICORN ONYX</text></svg>';
+
 /**
  * Resolves product image URLs (handling local static images, backend uploads, and fallback on error)
  */
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return '/images/1.png';
-  if (typeof imagePath !== 'string') return '/images/1.png';
+  if (!imagePath) return FALLBACK_IMAGE;
+  if (typeof imagePath !== 'string') return FALLBACK_IMAGE;
   
   // Base64 Data URLs and external HTTP/HTTPS URLs pass through directly
   if (imagePath.startsWith('data:') || imagePath.startsWith('http://') || imagePath.startsWith('https://')) {

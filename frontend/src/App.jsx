@@ -19,6 +19,7 @@ import FAQ from './pages/FAQ';
 import LaunchCountdown from './components/LaunchCountdown';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 
 const MainContent = () => {
   const { user } = useAuth();
@@ -29,10 +30,13 @@ const MainContent = () => {
   const targetLaunchTime = new Date('2026-07-26T19:00:00+05:30').getTime();
   
   const [bypassedLaunch, setBypassedLaunch] = useState(() => {
-    // Clear old localStorage keys to ensure countdown renders for all returning visitors
-    localStorage.removeItem('unicorn_launch_bypassed');
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('preview') === 'true' || sessionStorage.getItem('unicorn_launch_preview') === 'true';
+    try {
+      localStorage.removeItem('unicorn_launch_bypassed');
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('preview') === 'true' || sessionStorage.getItem('unicorn_launch_preview') === 'true';
+    } catch (e) {
+      return false;
+    }
   });
 
   const isBeforeLaunch = Date.now() < targetLaunchTime;
@@ -115,8 +119,6 @@ const MainContent = () => {
     </>
   );
 };
-
-import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (

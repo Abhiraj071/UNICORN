@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -15,14 +16,30 @@ import CompleteProfile from './pages/CompleteProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import LimitedDropsPage from './pages/LimitedDropsPage';
 import FAQ from './pages/FAQ';
+import LaunchCountdown from './components/LaunchCountdown';
 import { CartProvider } from './context/CartContext';
-import { AuthProvider } from './context/AuthContext';
-import { useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 const MainContent = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const showNavAndFooter = location.pathname !== '/login' && !location.pathname.startsWith('/admin');
+
+  // Launch countdown mode state
+  const targetLaunchTime = new Date('2026-07-26T19:00:00+05:30').getTime();
+  const [bypassedLaunch, setBypassedLaunch] = useState(() => {
+    return localStorage.getItem('unicorn_launch_bypassed') === 'true';
+  });
+
+  const isBeforeLaunch = Date.now() < targetLaunchTime;
+  const isLaunchRoute = location.pathname === '/launch';
+  const showLaunchCountdown = isLaunchRoute || (isBeforeLaunch && !bypassedLaunch && location.pathname === '/');
+
+  const handleEnterStore = () => {
+    localStorage.setItem('unicorn_launch_bypassed', 'true');
+    setBypassedLaunch(true);
+  };
+
+  const showNavAndFooter = !showLaunchCountdown && location.pathname !== '/login' && !location.pathname.startsWith('/admin');
 
   // Display banner if logged in, has no phone saved, and is not on login, account, track-order, or complete-profile pages
   const showCompletionBanner = user && 
@@ -32,12 +49,17 @@ const MainContent = () => {
     location.pathname !== '/track-order' && 
     location.pathname !== '/complete-profile';
 
+  if (showLaunchCountdown) {
+    return <LaunchCountdown onEnterStore={handleEnterStore} />;
+  }
+
   return (
     <>
       {showNavAndFooter && <Navbar showCompletionBanner={showCompletionBanner} />}
       <main className={showCompletionBanner ? 'navbar-with-banner' : ''}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/launch" element={<LaunchCountdown onEnterStore={handleEnterStore} />} />
           <Route path="/collections" element={<Home />} />
           <Route path="/collections/:collectionName" element={<Shop />} />
           <Route path="/new-arrivals" element={<Shop />} />

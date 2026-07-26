@@ -1,0 +1,277 @@
+/* LaunchCountdown.css - UNICORN ONYX Luxury Launch Screen */
+
+.launch-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  background: #050a07;
+  background: radial-gradient(circle at 50% 45%, #0c1811 0%, #060c09 60%, #030604 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Cinzel', serif;
+  user-select: none;
+}
+
+/* Background Animated Canvas */
+.launch-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Background Luxury Arches SVG */
+.launch-arches-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 900px;
+  height: 100%;
+  max-height: 800px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.35;
+}
+
+/* Main Content Card */
+.launch-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  max-width: 850px;
+  width: 90%;
+}
+
+/* Top Diamond Line Ornament */
+.launch-ornament {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+  opacity: 0.85;
+}
+
+.launch-ornament-line {
+  width: 45px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #8ab897, transparent);
+}
+
+.launch-ornament-diamond {
+  color: #d4a359;
+  font-size: 10px;
+  transform: rotate(45deg);
+  display: inline-block;
+  text-shadow: 0 0 8px rgba(212, 163, 89, 0.6);
+}
+
+/* Brand Title */
+.launch-title-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.launch-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  color: #f2f5f3;
+  margin: 0;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35em;
+}
+
+.launch-title-onyx {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #f7e4b6 0%, #d4a359 50%, #b8863b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 12px rgba(212, 163, 89, 0.3));
+}
+
+/* Subtitle Tagline */
+.launch-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.75rem, 1.6vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  color: #7b9e84;
+  margin: 0 0 3.5rem 0;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+/* Countdown Frame Box */
+.launch-timer-box {
+  position: relative;
+  background: rgba(8, 18, 12, 0.45);
+  border: 1px solid rgba(138, 184, 151, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 2rem 3rem;
+  border-radius: 2px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(138, 184, 151, 0.03);
+  margin-bottom: 2.5rem;
+  width: 100%;
+  max-width: 650px;
+  box-sizing: border-box;
+}
+
+.launch-timer-box::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 30%;
+  right: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d4a359, transparent);
+}
+
+.launch-timer-box::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 30%;
+  right: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d4a359, transparent);
+}
+
+.launch-timer-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  justify-content: center;
+}
+
+.launch-timer-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+}
+
+.launch-timer-number {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(3rem, 7vw, 5.2rem);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: #f7f9f8;
+  line-height: 1;
+  margin-bottom: 0.8rem;
+  text-shadow: 0 0 25px rgba(247, 249, 248, 0.25);
+}
+
+.launch-timer-separator {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #7b9e84;
+  opacity: 0.5;
+  line-height: 1;
+  padding-bottom: 1.5rem;
+}
+
+.launch-timer-label {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.65rem, 1.1vw, 0.75rem);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: #c4a163;
+  text-transform: uppercase;
+}
+
+/* Footer Date Notice */
+.launch-footer-text {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+  letter-spacing: 0.3em;
+  color: #8ab897;
+  opacity: 0.75;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+}
+
+/* Unveiled Live Button */
+.launch-unveil-btn {
+  background: linear-gradient(135deg, #d4a359 0%, #b8863b 100%);
+  color: #050a07;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.25em;
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.4s ease;
+  box-shadow: 0 10px 30px rgba(212, 163, 89, 0.3);
+  text-transform: uppercase;
+}
+
+.launch-unveil-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(212, 163, 89, 0.5);
+  background: linear-gradient(135deg, #ebd092 0%, #c99849 100%);
+}
+
+/* Admin / Preview Bypass Toggle */
+.launch-bypass-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 25px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(138, 184, 151, 0.2);
+  color: #7b9e84;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  padding: 0.4rem 0.9rem;
+  border-radius: 2px;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.3s ease;
+}
+
+.launch-bypass-btn:hover {
+  background: rgba(212, 163, 89, 0.1);
+  color: #d4a359;
+  border-color: #d4a359;
+}
+
+/* Responsive Tweaks */
+@media (max-width: 600px) {
+  .launch-timer-box {
+    padding: 1.5rem 1rem;
+  }
+  .launch-timer-unit {
+    padding: 0.25rem;
+  }
+  .launch-ornament-line {
+    width: 25px;
+  }
+}

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { getApiUrl, getImageUrl } from '../config/apiConfig';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  FiHeart, 
-  FiChevronRight, 
-  FiPlus, 
-  FiMinus, 
-  FiShoppingBag, 
-  FiTruck, 
-  FiShield, 
+import {
+  FiHeart,
+  FiChevronRight,
+  FiPlus,
+  FiMinus,
+  FiShoppingBag,
+  FiTruck,
+  FiShield,
   FiRefreshCw,
   FiMaximize2,
   FiChevronLeft,
@@ -32,11 +32,11 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { user, api } = useAuth();
-  
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Selection States
   const [activeImage, setActiveImage] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
@@ -45,7 +45,7 @@ const ProductDetails = () => {
   const [activeTab, setActiveTab] = useState('DESCRIPTION');
   const [showToast, setShowToast] = useState(false);
   const [buttonState, setButtonState] = useState('idle');
-  
+
   // Recommendations
   const [relatedProducts, setRelatedProducts] = useState([]);
 
@@ -144,12 +144,12 @@ const ProductDetails = () => {
   // Generate delivery dates dynamically (e.g. today + 3 to 6 days)
   const getDeliveryDateRange = () => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
+
     const dateStart = new Date();
     dateStart.setDate(dateStart.getDate() + 3);
     const dateEnd = new Date();
     dateEnd.setDate(dateEnd.getDate() + 6);
-    
+
     return `${dateStart.getDate()} ${months[dateStart.getMonth()]} – ${dateEnd.getDate()} ${months[dateEnd.getMonth()]}`;
   };
 
@@ -179,7 +179,7 @@ const ProductDetails = () => {
   // Gallery Images - Create a guaranteed list of valid thumbnail images with fallbacks
   const primaryImg = product.image || (product.gallery && product.gallery[0]) || '/images/1.png';
   const customGallery = (product.gallery && product.gallery.length > 0) ? product.gallery : [];
-  
+
   const rawGalleryList = [
     primaryImg,
     ...customGallery,
@@ -222,34 +222,34 @@ const ProductDetails = () => {
       {/* Main product column section */}
       <section className="details-main-section">
         <div className="container main-content-layout">
-          
+
           {/* Left Column: Image Gallery Stack */}
           <div className="gallery-column">
             <div className="thumbnails-stack-left">
               {galleryImages.map((imgUrl, idx) => (
-                <div 
+                <div
                   key={idx}
                   className={`thumbnail-box ${activeImage === imgUrl ? 'active-thumbnail' : ''}`}
                   onClick={() => setActiveImage(imgUrl)}
                 >
-                  <img 
-                    src={getImageUrl(imgUrl)} 
-                    alt={`${product.name} thumbnail ${idx + 1}`} 
+                  <img
+                    src={getImageUrl(imgUrl)}
+                    alt={`${product.name} thumbnail ${idx + 1}`}
                     onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
                   />
                 </div>
               ))}
             </div>
-            
+
             <div className="main-preview-right">
               {/* Expand click triggers visual preview */}
               <button className="expand-view-btn" title="View Fullscreen">
                 <FiMaximize2 size={16} />
               </button>
-              <img 
-                src={getImageUrl(currentActiveImage)} 
-                alt={product.name} 
-                className="main-active-image" 
+              <img
+                src={getImageUrl(currentActiveImage)}
+                alt={product.name}
+                className="main-active-image"
                 onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
               />
             </div>
@@ -257,7 +257,7 @@ const ProductDetails = () => {
 
           {/* Right Column: Information Panel */}
           <div className="info-column">
-            
+
             {/* Badge Indicator */}
             {product.badge && (
               <span className="details-badge">
@@ -267,7 +267,7 @@ const ProductDetails = () => {
 
             {/* Product Title Heading */}
             <h1 className="details-product-title">{product.name}</h1>
-            
+
             {/* Tagline */}
             <p className="details-tagline">Wear the darkness. Stand as the guardian.</p>
 
@@ -284,7 +284,7 @@ const ProductDetails = () => {
               <div className="spec-card-box">
                 <div className="spec-icon-label">
                   <span className="icon-badge-box">👕</span>
-                  <span className="spec-main-text">{(product.fit || 'Oversized').toUpperCase()} FIT</span>
+                  <span className="spec-main-text">{(product.fit || 'Oversized').toUpperCase()}</span>
                 </div>
                 <span className="spec-sub-text">Relaxed & Comfortable</span>
               </div>
@@ -337,7 +337,7 @@ const ProductDetails = () => {
               <div className="sizes-btn-row">
                 {product.sizes && product.sizes.length > 0 ? (
                   product.sizes.map(size => (
-                    <button 
+                    <button
                       key={size}
                       className={`size-select-btn ${selectedSize === size ? 'active-size-select' : ''}`}
                       onClick={() => setSelectedSize(size)}
@@ -363,7 +363,7 @@ const ProductDetails = () => {
                 </button>
               </div>
 
-              <button 
+              <button
                 className={`details-wishlist-btn ${wishlist.includes(id) ? 'wishlisted' : ''}`}
                 onClick={handleWishlistToggle}
               >
@@ -374,7 +374,7 @@ const ProductDetails = () => {
 
             {/* Purchase buttons */}
             <div className="purchase-buttons-row">
-              <button 
+              <button
                 className={`add-to-cart-btn ${buttonState !== 'idle' ? 'animating' : ''} ${buttonState === 'added' ? 'success' : ''}`}
                 onClick={() => {
                   if (buttonState !== 'idle') return;
@@ -403,7 +403,7 @@ const ProductDetails = () => {
                   <span className="button-success-text">✓ ADDED!</span>
                 )}
               </button>
-              <button 
+              <button
                 className="buy-now-btn"
                 onClick={() => {
                   addToCart(product, selectedSize, quantity);
@@ -424,7 +424,7 @@ const ProductDetails = () => {
         <div className="container">
           <div className="tabs-header-row">
             {TABS.map(tab => (
-              <button 
+              <button
                 key={tab}
                 className={`tab-btn-header ${activeTab === tab ? 'tab-btn-active' : ''}`}
                 onClick={() => setActiveTab(tab)}
@@ -504,7 +504,7 @@ const ProductDetails = () => {
             {activeTab === 'RETURNS' && (
               <div className="tab-pane returns-tab-pane">
                 <p className="tab-pane-paragraph">
-                  We offer a hassle-free 14 days return and exchange window on all items. 
+                  We offer a hassle-free 14 days return and exchange window on all items.
                 </p>
                 <ul className="details-bullets-list">
                   <li>Items must be returned in their original condition: unworn, unwashed, and with all tags attached.</li>
@@ -598,7 +598,7 @@ const ProductDetails = () => {
                       Based on {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
                     </div>
                   </div>
-                  
+
                   <div className="rating-distribution" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '200px' }}>
                     {[5, 4, 3, 2, 1].map(stars => {
                       const count = reviews.filter(r => r.rating === stars).length;
@@ -643,7 +643,7 @@ const ProductDetails = () => {
                     {user ? (
                       <div className="graphics-card" style={{ padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '4px' }}>
                         <h4 style={{ marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '1px' }}>Write a Review</h4>
-                        
+
                         {reviewStatusMsg ? (
                           <div style={{ padding: '1rem', backgroundColor: 'rgba(40,167,69,0.08)', color: 'var(--color-success)', border: '1px solid rgba(40,167,69,0.3)', borderRadius: '4px', textAlign: 'center', fontSize: '0.85rem', lineHeight: '1.4' }}>
                             {reviewStatusMsg}
@@ -654,8 +654,8 @@ const ProductDetails = () => {
                               <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>RATING *</label>
                               <div className="rating-select-stars" style={{ display: 'flex', gap: '0.5rem', fontSize: '1.5rem', color: 'var(--color-gold)', cursor: 'pointer' }}>
                                 {[1, 2, 3, 4, 5].map(stars => (
-                                  <span 
-                                    key={stars} 
+                                  <span
+                                    key={stars}
                                     onClick={() => setNewRating(stars)}
                                     title={`${stars} Stars`}
                                   >
@@ -666,13 +666,13 @@ const ProductDetails = () => {
                             </div>
                             <div className="form-group-field" style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                               <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>COMMENT *</label>
-                              <textarea 
-                                placeholder="Share your experience wearing this piece..." 
+                              <textarea
+                                placeholder="Share your experience wearing this piece..."
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
-                                className="gothic-input" 
+                                className="gothic-input"
                                 style={{ minHeight: '90px', resize: 'vertical', padding: '0.6rem', fontSize: '0.85rem' }}
-                                required 
+                                required
                               />
                             </div>
                             <button type="submit" className="summon-action-cta-btn" style={{ width: '100%', marginTop: '0.5rem' }}>SUBMIT REVIEW</button>
@@ -709,8 +709,8 @@ const ProductDetails = () => {
 
           <div className="related-products-grid">
             {relatedProducts.map(relProduct => (
-              <div 
-                key={relProduct._id} 
+              <div
+                key={relProduct._id}
                 className="related-product-card"
                 onClick={() => {
                   navigate(`/product/${relProduct._id}`);

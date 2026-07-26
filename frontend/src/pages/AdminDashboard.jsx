@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../config/apiConfig';
 import { 
   FiGrid, 
   FiUsers, 
@@ -1960,7 +1961,12 @@ const AdminDashboard = () => {
                           </td>
                           <td className="thumb-col">
                             <div className="table-thumbnail-wrapper-zoom">
-                              <img src={prod.image} alt={prod.name} className="gothic-table-thumb zoom-img" />
+                              <img 
+                                src={getImageUrl(prod.image)} 
+                                alt={prod.name} 
+                                className="gothic-table-thumb zoom-img" 
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                              />
                             </div>
                           </td>
                           <td>
@@ -3924,7 +3930,12 @@ const AdminDashboard = () => {
                       <div className="gallery-preview-wrapper" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {formGallery.map((img, idx) => (
                           <div key={idx} style={{ position: 'relative' }}>
-                            <img src={img} alt={`Gallery ${idx}`} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                            <img 
+                              src={getImageUrl(img)} 
+                              alt={`Gallery ${idx}`} 
+                              style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border-color)' }} 
+                              onError={(e) => { e.target.onerror = null; e.target.src = '/images/1.png'; }}
+                            />
                             <button 
                               type="button" 
                               onClick={() => setFormGallery(formGallery.filter((_, i) => i !== idx))}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -33,6 +33,14 @@ const MainContent = () => {
   const isBeforeLaunch = Date.now() < targetLaunchTime;
   const isLaunchRoute = location.pathname === '/launch';
   const showLaunchCountdown = isLaunchRoute || (isBeforeLaunch && !bypassedLaunch && location.pathname === '/');
+
+  // Reset bypass state whenever /launch is explicitly opened
+  useEffect(() => {
+    if (isLaunchRoute) {
+      localStorage.removeItem('unicorn_launch_bypassed');
+      setBypassedLaunch(false);
+    }
+  }, [isLaunchRoute]);
 
   const handleEnterStore = () => {
     localStorage.setItem('unicorn_launch_bypassed', 'true');

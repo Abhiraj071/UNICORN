@@ -116,6 +116,15 @@ const Checkout = () => {
       errors.pincode = 'Pincode must be a valid 6-digit code';
     }
 
+    if (paymentMethod === 'upi') {
+      const cleanTxn = upiTxnId.trim();
+      if (!cleanTxn) {
+        errors.upiTxnId = '12-digit UPI UTR / Transaction Reference ID is required to confirm payment';
+      } else if (cleanTxn.length < 8) {
+        errors.upiTxnId = 'Please enter a valid 12-digit UPI UTR / Transaction Reference ID';
+      }
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -237,8 +246,10 @@ const Checkout = () => {
         postalCode: pincode,
         country: 'India',
       },
-      paymentMethod: paymentMethod === 'upi' ? (upiTxnId ? `UPI Scanner (Ref: ${upiTxnId.trim()})` : 'UPI Scanner') : 'Cash on Delivery (COD)',
+      paymentMethod: paymentMethod === 'upi' ? `UPI Scanner (Ref: ${upiTxnId.trim()})` : 'Cash on Delivery (COD)',
       totalPrice: grandTotal,
+      isPaid: paymentMethod === 'upi',
+      paidAt: paymentMethod === 'upi' ? new Date().toISOString() : undefined,
     };
 
     setOrderLoading(true);
@@ -884,22 +895,29 @@ const Checkout = () => {
                                 <span className="step-num">3</span>
                                 <span>Click <strong>PLACE ORDER</strong> below</span>
                               </div>
-                            </div>
 
-                            {/* Optional UTR Field */}
-                            <div className="upi-utr-box">
-                              <label htmlFor="upi-utr-input" className="utr-label">
-                                UPI Ref / UTR No. <span className="utr-optional">(Optional)</span>
-                              </label>
-                              <input
-                                type="text"
-                                id="upi-utr-input"
-                                className="utr-input-field"
-                                placeholder="12-digit UTR number after payment"
-                                value={upiTxnId}
-                                onChange={(e) => setUpiTxnId(e.target.value)}
-                                maxLength={16}
-                              />
+                              {/* Required UTR Field */}
+                              <div className="upi-utr-box">
+                                <label htmlFor="upi-utr-input" className="utr-label">
+                                  12-Digit UPI UTR / Ref No. <span className="utr-required" style={{ color: '#eb001b', fontWeight: 'bold' }}>* (Required to Confirm Payment)</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  id="upi-utr-input"
+                                  name="upiTxnId"
+                                  className={`utr-input-field ${formErrors.upiTxnId ? 'input-error' : ''}`}
+                                  placeholder="Enter 12-digit UTR number from UPI app"
+                                  value={upiTxnId}
+                                  onChange={(e) => setUpiTxnId(e.target.value)}
+                                  maxLength={18}
+                                  style={{ borderColor: formErrors.upiTxnId ? '#eb001b' : '' }}
+                                />
+                                {formErrors.upiTxnId && (
+                                  <span className="error-text-msg" style={{ color: '#eb001b', marginTop: '0.4rem', display: 'block', fontSize: '0.8rem' }}>
+                                    ⚠️ {formErrors.upiTxnId}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>

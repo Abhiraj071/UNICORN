@@ -176,22 +176,23 @@ const ProductDetails = () => {
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : 0;
 
-  // Gallery Images - Create a guaranteed list of valid thumbnail images with fallbacks
-  const primaryImg = product.image || (product.gallery && product.gallery[0]) || '/images/1.png';
-  const customGallery = (product.gallery && product.gallery.length > 0) ? product.gallery : [];
+  const isDummy = (url) => !url || url === '/images/ComBack.png' || url.includes('ComBack.png');
 
-  const rawGalleryList = [
-    primaryImg,
-    ...customGallery,
-    '/images/1.png',
-    '/images/2.png',
-    '/images/3.png',
-    '/images/4.png'
-  ];
+  let validPrimary = product.image;
+  if (isDummy(validPrimary) && Array.isArray(product.gallery)) {
+    const realImg = product.gallery.find((img) => !isDummy(img));
+    if (realImg) validPrimary = realImg;
+  }
 
-  // Remove duplicate entries and falsy strings
-  const galleryImages = Array.from(new Set(rawGalleryList.filter(Boolean))).slice(0, 4);
-  const currentActiveImage = activeImage || primaryImg;
+  const customGallery = (Array.isArray(product.gallery) ? product.gallery : []).filter((img) => !isDummy(img));
+
+  let galleryImages = Array.from(new Set([validPrimary, ...customGallery].filter((img) => Boolean(img) && !isDummy(img))));
+
+  if (galleryImages.length === 0) {
+    galleryImages = [FALLBACK_IMAGE];
+  }
+
+  const currentActiveImage = (activeImage && !isDummy(activeImage)) ? activeImage : (galleryImages[0] || FALLBACK_IMAGE);
 
   // Price Formatter
   const formatPrice = (price) => {

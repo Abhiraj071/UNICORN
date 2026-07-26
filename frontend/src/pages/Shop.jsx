@@ -547,15 +547,25 @@ const Shop = () => {
                             </button>
 
                             {/* Product Image */}
-                            <img 
-                              src={getImageUrl(product.image)} 
-                              alt={product.name} 
-                              className="product-image"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = FALLBACK_IMAGE;
-                              }}
-                            />
+                            {(() => {
+                              const isDummy = (url) => !url || url === '/images/ComBack.png' || url.includes('ComBack.png');
+                              let displayImg = product.image;
+                              if (isDummy(displayImg) && Array.isArray(product.gallery)) {
+                                const real = product.gallery.find((g) => !isDummy(g));
+                                if (real) displayImg = real;
+                              }
+                              return (
+                                <img 
+                                  src={getImageUrl(displayImg)} 
+                                  alt={product.name} 
+                                  className="product-image"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = FALLBACK_IMAGE;
+                                  }}
+                                />
+                              );
+                            })()}
                           </div>
 
                           {/* Product Details Info */}

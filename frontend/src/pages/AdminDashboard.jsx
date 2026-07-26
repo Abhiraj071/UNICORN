@@ -485,10 +485,11 @@ const AdminDashboard = () => {
       }
 
       if (uploadedUrls.length > 0) {
-        if (!formImage) {
-          setFormImage(uploadedUrls[0]);
-        }
-        setFormGallery((prev) => [...prev, ...uploadedUrls]);
+        setFormImage(uploadedUrls[0]);
+        setFormGallery((prev) => {
+          const cleanPrev = prev.filter((img) => img !== '/images/ComBack.png');
+          return Array.from(new Set([...uploadedUrls, ...cleanPrev]));
+        });
       }
     } catch (err) {
       console.error('Upload processing error:', err);
@@ -877,7 +878,7 @@ const AdminDashboard = () => {
     setFormFit('Oversized Boxy Fit');
     setFormColor('Obsidian Black');
     setFormGender('Unisex');
-    setFormImage('/images/ComBack.png');
+    setFormImage('');
     setFormGallery([]);
     setFormDescription('');
     setFormSizes(['S', 'M', 'L', 'XL']);

@@ -9,6 +9,7 @@ const addOrderItems = async (req, res) => {
     shippingAddress,
     paymentMethod,
     totalPrice,
+    upiTxnId,
     isPaid,
     paidAt,
   } = req.body;
@@ -16,20 +17,38 @@ const addOrderItems = async (req, res) => {
   if (orderItems && orderItems.length === 0) {
     res.status(400).json({ message: 'No order items' });
     return;
-  } else {
-    const order = new Order({
-      orderItems,
-      user: req.user._id,
-      shippingAddress,
-      paymentMethod,
-      totalPrice,
-      isPaid: Boolean(isPaid),
-      paidAt: isPaid ? (paidAt || Date.now()) : undefined,
+  }
+
+  // Check for duplicate UTR usage across orders
+  if (upiTxnId && typeof upiTxnId === 'string' && upiTxnId.trim().length >= 8) {
+    const cleanUtr = upiTxnId.trim();
+    const existingOrder = await Order.findOne({
+      $or: [
+        { paymentMethod: { $regex: cleanUtr, $options: 'i' } },
+        { 'paymentResult.id': cleanUtr }
+      ]
     });
 
-    const createdOrder = await order.save();
-    res.status(201).json(createdOrder);
+    if (existingOrder) {
+      res.status(400).json({
+        message: `This UPI UTR / Ref ID (${cleanUtr}) has already been used for order #${existingOrder._id.toString().slice(-6).toUpperCase()}. Please enter your valid unique payment UTR.`
+      });
+      return;
+    }
   }
+
+  const order = new Order({
+    orderItems,
+    user: req.user._id,
+    shippingAddress,
+    paymentMethod,
+    totalPrice,
+    isPaid: Boolean(isPaid),
+    paidAt: isPaid ? (paidAt || Date.now()) : undefined,
+  });
+
+  const createdOrder = await order.save();
+  res.status(201).json(createdOrder);
 };
 
 // @desc    Get logged in user orders

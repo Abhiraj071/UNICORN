@@ -247,6 +247,7 @@ const Checkout = () => {
         country: 'India',
       },
       paymentMethod: paymentMethod === 'upi' ? `UPI Scanner (Ref: ${upiTxnId.trim()})` : 'Cash on Delivery (COD)',
+      upiTxnId: paymentMethod === 'upi' ? upiTxnId.trim() : undefined,
       totalPrice: grandTotal,
       isPaid: paymentMethod === 'upi',
       paidAt: paymentMethod === 'upi' ? new Date().toISOString() : undefined,

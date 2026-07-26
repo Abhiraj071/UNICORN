@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -23,6 +23,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 const MainContent = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Launch countdown target: July 26, 2026 at 7:00 PM IST (19:00:00)
   const targetLaunchTime = new Date('2026-07-26T19:00:00+05:30').getTime();
@@ -38,17 +39,18 @@ const MainContent = () => {
   const isLaunchRoute = location.pathname === '/launch';
   const showLaunchCountdown = isLaunchRoute || (isBeforeLaunch && !bypassedLaunch && location.pathname === '/');
 
-  // Reset preview bypass whenever /launch route is accessed
+  // Reset preview bypass whenever /launch route is accessed directly
   useEffect(() => {
-    if (isLaunchRoute) {
+    if (isLaunchRoute && bypassedLaunch) {
       sessionStorage.removeItem('unicorn_launch_preview');
       setBypassedLaunch(false);
     }
-  }, [isLaunchRoute]);
+  }, [isLaunchRoute, bypassedLaunch]);
 
   const handleEnterStore = () => {
     sessionStorage.setItem('unicorn_launch_preview', 'true');
     setBypassedLaunch(true);
+    navigate('/shop');
   };
 
   const handleResetLaunch = () => {

@@ -223,6 +223,8 @@ router.get('/google', (req, res, next) => {
 router.get(
   '/google/callback',
   async (req, res, next) => {
+    const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://unicornonyx.com' : 'http://localhost:5173');
+
     if (req.query.mock === 'true') {
       const { name, email, id } = req.query;
       try {
@@ -234,6 +236,7 @@ router.get(
           let existingEmailUser = await User.findOne({ email: email.toLowerCase() });
           if (existingEmailUser) {
             existingEmailUser.googleId = id;
+            existingEmailUser.isVerified = true;
             await existingEmailUser.save();
             user = existingEmailUser;
           } else {
@@ -241,27 +244,26 @@ router.get(
               googleId: id,
               name: name,
               email: email.toLowerCase(),
-              // Default phone to undefined so they are routed to /complete-profile
+              isVerified: true,
             });
           }
         }
         
-        generateToken(res, user._id);
-        return res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
+        const token = generateToken(res, user._id);
+        return res.redirect(`${frontendUrl}?token=${token}`);
       } catch (err) {
         console.error('Mock Google Callback Error:', err);
-        return res.redirect((process.env.FRONTEND_URL || 'http://localhost:5173') + '/login?error=mock_oauth_failed');
+        return res.redirect(`${frontendUrl}/login?error=mock_oauth_failed`);
       }
     }
     
-    const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://unicornonyx.com' : 'http://localhost:5173');
     passport.authenticate('google', { session: false, failureRedirect: `${frontendUrl}/login?error=google_failed` })(req, res, (err) => {
-      if (err) {
+      if (err || !req.user) {
         console.error('Google Passport Callback Error:', err);
         return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
       }
-      generateToken(res, req.user._id);
-      res.redirect(frontendUrl);
+      const token = generateToken(res, req.user._id);
+      res.redirect(`${frontendUrl}?token=${token}`);
     });
   }
 );

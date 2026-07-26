@@ -26,10 +26,10 @@
   --font-heading-decorative: 'Cinzel Decorative', serif;
   --font-body: 'Inter', sans-serif;
    */
-  --font-brand: "Algerian", serif;
-  --font-heading: "Algerian", serif;
-  --font-heading-decorative: "Algerian", serif;
-  --font-body: "Arial", sans-serif;
+  --font-brand: "Algerian",'Cinzel Decorative', serif;
+  --font-heading: "Algerian",'Cinzel', serif;
+  --font-heading-decorative: "Algerian", 'Cinzel Decorative', serif;
+  --font-body: "Arial",'Inter', sans-serif;
 
 
   --radius-btn: 10px;

@@ -118,6 +118,10 @@ const Login = () => {
     } catch (err) {
       if (err.unverified) {
         setRegVerifyEmail(err.email);
+        if (err.otp) {
+          setRegTestingOtp(err.otp);
+          setRegVerifyOtp(err.otp);
+        }
         setIsRegisterVerifying(true);
         setSuccessMessage('Please verify your email address first.');
       }
@@ -154,8 +158,12 @@ const Login = () => {
 
     setLoading(true);
     try {
-      await register(regName.trim(), regEmail.trim(), regPassword);
+      const res = await register(regName.trim(), regEmail.trim(), regPassword);
       setRegVerifyEmail(regEmail.trim());
+      if (res && res.otp) {
+        setRegTestingOtp(res.otp);
+        setRegVerifyOtp(res.otp);
+      }
       setIsRegisterVerifying(true);
       setSuccessMessage('Registration initiated! Verification code sent to your email.');
     } catch (err) {

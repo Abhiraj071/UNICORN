@@ -19,9 +19,10 @@ passport.use(new GoogleStrategy({
       } else {
         // Create new user
         // If email already exists from standard auth, link or return error
-        let existingEmailUser = await User.findOne({ email: profile.emails[0].value });
+        let existingEmailUser = await User.findOne({ email: profile.emails[0].value.toLowerCase() });
         if (existingEmailUser) {
            existingEmailUser.googleId = profile.id;
+           existingEmailUser.isVerified = true;
            await existingEmailUser.save();
            return done(null, existingEmailUser);
         }
@@ -29,7 +30,8 @@ passport.use(new GoogleStrategy({
         const newUser = {
           googleId: profile.id,
           name: profile.displayName,
-          email: profile.emails[0].value,
+          email: profile.emails[0].value.toLowerCase(),
+          isVerified: true,
         };
         user = await User.create(newUser);
         done(null, user);

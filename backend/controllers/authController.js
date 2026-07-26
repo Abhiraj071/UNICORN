@@ -74,16 +74,18 @@ const authUser = async (req, res) => {
         message: 'Your email address is not verified. A verification code has been sent to your email.',
         unverified: true,
         email: user.email,
+        otp: otpSent ? undefined : otp,
       });
     }
 
-    generateToken(res, user._id);
+    const token = generateToken(res, user._id);
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
+      token,
     });
   } else {
     res.status(401).json({ message: 'Invalid email/phone or password' });
@@ -175,6 +177,7 @@ const registerUser = async (req, res) => {
       message: otpSent 
         ? 'Verification code sent to your email.' 
         : 'Registration successful. Please check your email for the verification code.',
+      otp: otpSent ? undefined : otp,
     });
   } catch (error) {
     console.error('Register user error:', error);
@@ -454,7 +457,7 @@ const verifyOTP = async (req, res) => {
     const isNewUser = !user.email || !user.phone || !user.name || user.name.startsWith('User-');
 
     // Generate JWT cookie
-    generateToken(res, user._id);
+    const token = generateToken(res, user._id);
 
     res.status(200).json({
       _id: user._id,
@@ -463,6 +466,7 @@ const verifyOTP = async (req, res) => {
       phone: user.phone,
       isAdmin: user.isAdmin,
       isNewUser,
+      token,
     });
   } catch (error) {
     console.error('Error verifying OTP:', error);
@@ -660,7 +664,7 @@ const verifyRegisterOTP = async (req, res) => {
     await user.save();
 
     // Generate JWT cookie
-    generateToken(res, user._id);
+    const token = generateToken(res, user._id);
 
     res.status(200).json({
       _id: user._id,
@@ -668,6 +672,7 @@ const verifyRegisterOTP = async (req, res) => {
       email: user.email,
       phone: user.phone,
       isAdmin: user.isAdmin,
+      token,
     });
   } catch (error) {
     console.error('Verify register OTP error:', error);

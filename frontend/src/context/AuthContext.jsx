@@ -14,6 +14,10 @@ api.interceptors.request.use((config) => {
   if (config.url && config.url.startsWith('/api/')) {
     config.url = config.url.replace(/^\/api/, '');
   }
+  const token = localStorage.getItem('unicorn_user_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -25,10 +29,29 @@ export const AuthProvider = ({ children }) => {
   // Check auth status on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // Check if URL contains token query param (e.g. from Google OAuth redirect)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+
+      if (urlToken) {
+        localStorage.setItem('unicorn_user_token', urlToken);
+        // Clean up token from URL without refresh
+        urlParams.delete('token');
+        const cleanSearch = urlParams.toString();
+        const newUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : '') + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+
+      const token = localStorage.getItem('unicorn_user_token');
+
       try {
-        const { data } = await api.get('/auth/profile');
+        const { data } = await api.get('/auth/profile', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
         setUser(data);
       } catch (err) {
+        // If token invalid, clear it
+        localStorage.removeItem('unicorn_user_token');
         setUser(null);
       } finally {
         setLoading(false);
@@ -48,6 +71,9 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const { data } = await api.post('/auth/login', { emailOrPhone, password });
+      if (data.token) {
+        localStorage.setItem('unicorn_user_token', data.token);
+      }
       setUser(data);
       return data;
     } catch (err) {
@@ -79,9 +105,11 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await api.post('/auth/logout');
-      setUser(null);
     } catch (err) {
       console.error('Logout failed:', err);
+    } finally {
+      localStorage.removeItem('unicorn_user_token');
+      setUser(null);
     }
   };
 
@@ -89,6 +117,9 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const { data } = await api.put('/auth/profile', userData);
+      if (data.token) {
+        localStorage.setItem('unicorn_user_token', data.token);
+      }
       setUser(data);
       return data;
     } catch (err) {
@@ -114,6 +145,9 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const { data } = await api.post('/auth/otp/verify', { phoneOrEmail, otp });
+      if (data.token) {
+        localStorage.setItem('unicorn_user_token', data.token);
+      }
       setUser(data);
       return data;
     } catch (err) {
@@ -151,6 +185,9 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const { data } = await api.post('/auth/register/verify', { email, otp });
+      if (data.token) {
+        localStorage.setItem('unicorn_user_token', data.token);
+      }
       setUser(data);
       return data;
     } catch (err) {

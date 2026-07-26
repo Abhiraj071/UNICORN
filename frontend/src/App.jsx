@@ -39,6 +39,11 @@ const MainContent = () => {
     setBypassedLaunch(true);
   };
 
+  const handleResetLaunch = () => {
+    localStorage.removeItem('unicorn_launch_bypassed');
+    setBypassedLaunch(false);
+  };
+
   const showNavAndFooter = !showLaunchCountdown && location.pathname !== '/login' && !location.pathname.startsWith('/admin');
 
   // Display banner if logged in, has no phone saved, and is not on login, account, track-order, or complete-profile pages

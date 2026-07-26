@@ -82,6 +82,7 @@ const Footer = () => {
           <h4>About</h4>
           <ul>
             <li><Link to="/about">Our Story</Link></li>
+            <li><Link to="/launch" style={{ color: '#d4a359', fontWeight: '600' }}>Launch Countdown</Link></li>
             <li><Link to="/quality">Quality</Link></li>
             <li><Link to="/sustainability">Sustainability</Link></li>
             <li><Link to="/reviews">Reviews</Link></li>

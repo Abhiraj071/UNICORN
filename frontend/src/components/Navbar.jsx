@@ -67,7 +67,6 @@ const Navbar = ({ showCompletionBanner }) => {
           {/* Center: Logo */}
           <div className="nav-center">
             <Link to="/" className="logo-brand-link">
-              <img src="/images/logo.png" alt="UNICORN ONYX Logo" className="web-logo-img" />
               <span className="logo-text">UNICORN ONYX</span>
             </Link>
           </div>
@@ -116,7 +115,6 @@ const Navbar = ({ showCompletionBanner }) => {
         <div className="mobile-menu-header">
           <div className="spacer"></div>
           <Link to="/" className="logo-brand-link mobile-logo-link" onClick={() => setMobileMenuOpen(false)}>
-            <img src="/images/logo.png" alt="UNICORN ONYX Logo" className="web-logo-img mobile" />
             <span className="logo-text">UNICORN ONYX</span>
           </Link>
           <button className="icon-btn close-btn" onClick={() => setMobileMenuOpen(false)}>

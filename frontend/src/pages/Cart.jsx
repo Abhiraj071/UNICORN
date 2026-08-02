@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../config/apiConfig';
+import { getApiUrl, getImageUrl, FALLBACK_IMAGE } from '../config/apiConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FiTrash2,
@@ -117,7 +117,11 @@ const Cart = () => {
                 {cartItems.map((item) => (
                   <div key={item.cartItemId} className="cart-item-card">
                     <div className="item-thumbnail">
-                      <img src={item.image} alt={item.name} />
+                      <img
+                        src={getImageUrl(item.image)}
+                        alt={item.name}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }}
+                      />
                     </div>
 
                     <div className="item-details">
@@ -302,7 +306,12 @@ const Cart = () => {
                     <button className="rec-card-wish-btn" onClick={(e) => e.stopPropagation()}>
                       <FiHeart size={14} />
                     </button>
-                    <img src={p.image} alt={p.name} className="rec-card-img" />
+                    <img
+                      src={getImageUrl(p.image)}
+                      alt={p.name}
+                      className="rec-card-img"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }}
+                    />
                   </div>
                   <div className="rec-card-info">
                     <h4 className="rec-card-name">{p.name}</h4>

@@ -754,7 +754,12 @@ const ProductDetails = () => {
                   <button className="rel-card-wish-btn" onClick={(e) => e.stopPropagation()}>
                     <FiHeart size={14} />
                   </button>
-                  <img src={relProduct.image} alt={relProduct.name} className="rel-card-image" />
+                  <img
+                    src={getImageUrl(relProduct.image)}
+                    alt={relProduct.name}
+                    className="rel-card-image"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }}
+                  />
                 </div>
                 <div className="rel-card-info-box">
                   <h4 className="rel-card-title">{relProduct.name}</h4>
@@ -769,7 +774,12 @@ const ProductDetails = () => {
       {/* Toast Notification */}
       {showToast && (
         <div className="cart-toast-notification">
-          <img src={product.image} alt={product.name} className="toast-img" />
+          <img
+            src={getImageUrl(product.image)}
+            alt={product.name}
+            className="toast-img"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }}
+          />
           <div className="toast-content">
             <span className="toast-title">Summoned to Cart</span>
             <span className="toast-product-name">{product.name}</span>

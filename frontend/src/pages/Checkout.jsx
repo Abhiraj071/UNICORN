@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getImageUrl, FALLBACK_IMAGE } from '../config/apiConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FiLock,
@@ -423,7 +424,11 @@ const Checkout = () => {
                   {purchasedItems.map((item) => (
                     <div key={item.cartItemId} className="success-item-row">
                       <div className="success-item-thumb">
-                        <img src={item.image} alt={item.name} />
+                        <img
+                          src={getImageUrl(item.image)}
+                          alt={item.name}
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }}
+                        />
                       </div>
                       <div className="success-item-info">
                         <h4 className="success-item-name">{item.name}</h4>
@@ -989,7 +994,11 @@ const Checkout = () => {
                     {cartItems.map((item) => (
                       <div key={item.cartItemId} className="summary-item-card-row">
                         <div className="summary-item-thumbnail-box">
-                          <img src={item.image} alt={item.name} />
+                          <img
+                            src={getImageUrl(item.image)}
+                            alt={item.name}
+                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }}
+                          />
                           <span className="item-qty-badge-overlay">{item.qty}</span>
                         </div>
                         <div className="summary-item-details-box">

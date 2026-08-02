@@ -850,9 +850,9 @@ const AdminDashboard = () => {
       setFormDescription(generatedDesc);
       
       // Suggest SEO titles
-      setMetaTitle(`${formName} | Luxury Gothic Apparel | ${formBrand}`);
+      setMetaTitle(`${formName} | Not Made For Everyone | ${formBrand}`);
       setMetaDesc(`Buy the premium ${formName} online. Custom oversized tailoring, premium heavyweight construction, and dark aesthetic design. Only at ${formBrand}.`);
-      setMetaKeywords(`gothic fashion, ${formCategory.toLowerCase()}, ${formBrand.toLowerCase()}, luxury streetwear, oversized fit`);
+      setMetaKeywords(`gothic fashion, ${formCategory.toLowerCase()}, ${formBrand.toLowerCase()}, not made for everyone, oversized fit`);
       
       setAiGenerating(false);
     }, 1000);
@@ -4161,7 +4161,7 @@ const AdminDashboard = () => {
       {/* Dashboard Footer inside Main panel */}
       <footer className="gothic-panel-footer">
         <span className="footer-left-txt">© 2025 Unicorn. All rights reserved.</span>
-        <span className="footer-right-txt">Made with ❤️ by Abhishek</span>
+        <span className="footer-right-txt">UNICORN ONYX System v2.0</span>
       </footer>
 
     </div>

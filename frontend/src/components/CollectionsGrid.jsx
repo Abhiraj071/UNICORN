@@ -13,7 +13,7 @@ const collections = [
     imagePos: 'left'
   },
   {
-    id: '04',
+    id: '02',
     title: 'LIMITED\nDROPS',
     description: 'Exclusive designs released in limited quantities. Once sold out, they may never return.',
     link: '/limited-drops',
@@ -22,7 +22,7 @@ const collections = [
     imagePos: 'right'
   },
   {
-    id: '02',
+    id: '03',
     title: 'URBAN NOIR',
     description: 'Contemporary streetwear inspired by dark aesthetics, clean lines, and everyday versatility.',
     link: '/collections/urban',
@@ -30,7 +30,7 @@ const collections = [
     imagePos: 'left'
   },
   {
-    id: '03',
+    id: '04',
     title: 'NEW\nARRIVALS',
     description: 'The latest designs added to the Unicorn collection. Fresh drops. New energy.',
     link: '/collections/new',

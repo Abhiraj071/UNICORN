@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiClock, FiShoppingBag, FiLock, FiCheckCircle } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
+import { getImageUrl, FALLBACK_IMAGE } from '../config/apiConfig';
 import './LimitedDropsPage.css';
 
 const LimitedDropsPage = () => {
@@ -148,7 +149,12 @@ const LimitedDropsPage = () => {
                   {isSoldOut && <div className="archived-watermark">VAULTED</div>}
                   
                   <div className="drop-card-image-wrapper">
-                    <img src={d.image} alt={d.name} className="drop-card-image" />
+                    <img
+                      src={getImageUrl(d.image)}
+                      alt={d.name}
+                      className="drop-card-image"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMAGE; }}
+                    />
                     {isLive ? (
                       <span className="live-pill-tag">
                         <span className="live-pulsing-dot"></span> LIVE RELEASE

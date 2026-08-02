@@ -76,7 +76,7 @@ const Contact = () => {
                   </div>
                   <div className="channel-texts">
                     <span className="channel-title">SUPPORT EMAIL</span>
-                    <a href="mailto:support@unicorn.clothing" className="channel-link">unicorn.rare.co@gmail.com</a>
+                    <a href="mailto:unicorn.rare.co@gmail.com" className="channel-link">unicorn.rare.co@gmail.com</a>
                   </div>
                 </div>
 

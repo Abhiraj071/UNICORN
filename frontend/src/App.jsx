@@ -26,6 +26,11 @@ const MainContent = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Scroll to top instantly on route/pathname change to fix bottom scroll glitch
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
   // Launch countdown target: July 26, 2026 at 7:00 PM IST (19:00:00)
   const targetLaunchTime = new Date('2026-07-26T19:00:00+05:30').getTime();
   

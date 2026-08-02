@@ -52,31 +52,45 @@
   align-items: center;
 }
 
-.logo {
-  font-family: var(--font-heading-decorative);
-  font-size: 2.2rem;
-  letter-spacing: 6px;
-  color: var(--text-primary);
+.logo-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.logo-brand-link:hover {
+  transform: scale(1.02);
+}
+
+.web-logo-img {
+  height: 48px;
+  width: 48px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent-gold, #d4a359);
+  box-shadow: 0 0 10px rgba(212, 163, 89, 0.35);
+  transition: all 0.3s ease;
+}
+
+.web-logo-img.mobile {
+  height: 38px;
+  width: 38px;
+}
+
+.logo-brand-link:hover .web-logo-img {
+  box-shadow: 0 0 16px rgba(212, 163, 89, 0.65);
+  transform: rotate(4deg);
+}
+
+.logo-text {
+  font-family: var(--font-heading-decorative), 'Cinzel', serif;
+  font-size: 1.6rem;
+  letter-spacing: 5px;
+  color: var(--text-primary, #ffffff);
+  font-weight: 700;
   text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-}
-
-.logo-o-wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  width: 1.8rem;
-  height: 1.8rem;
-  vertical-align: middle;
-  margin: 0 0.1rem;
-}
-
-.logo-o-svg {
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
 }
 
 .desktop-nav {

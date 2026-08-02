@@ -66,13 +66,9 @@ const Navbar = ({ showCompletionBanner }) => {
 
           {/* Center: Logo */}
           <div className="nav-center">
-            <Link to="/" className="logo">
-              UNIC<span className="logo-o-wrapper">
-                <svg viewBox="0 0 100 100" className="logo-o-svg">
-                  <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="9" fill="none" />
-                  <path d="M50 22 L53 47 L78 50 L53 53 L50 78 L47 53 L22 50 L47 47 Z" fill="currentColor" />
-                </svg>
-              </span>RN
+            <Link to="/" className="logo-brand-link">
+              <img src="/images/logo.png" alt="UNICORN ONYX Logo" className="web-logo-img" />
+              <span className="logo-text">UNICORN ONYX</span>
             </Link>
           </div>
 
@@ -119,7 +115,10 @@ const Navbar = ({ showCompletionBanner }) => {
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-menu-header">
           <div className="spacer"></div>
-          <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)}>UNICORN</Link>
+          <Link to="/" className="logo-brand-link mobile-logo-link" onClick={() => setMobileMenuOpen(false)}>
+            <img src="/images/logo.png" alt="UNICORN ONYX Logo" className="web-logo-img mobile" />
+            <span className="logo-text">UNICORN ONYX</span>
+          </Link>
           <button className="icon-btn close-btn" onClick={() => setMobileMenuOpen(false)}>
             <X size={28} />
           </button>

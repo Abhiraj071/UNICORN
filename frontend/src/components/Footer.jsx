@@ -16,13 +16,9 @@ const Footer = () => {
 
         {/* Left column: Brand Info */}
         <div className="footer-col brand-col">
-          <Link to="/" className="footer-logo">
-            UNIC<span className="logo-o-wrapper">
-              <svg viewBox="0 0 100 100" className="logo-o-svg">
-                <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="9" fill="none" />
-                <path d="M50 22 L53 47 L78 50 L53 53 L50 78 L47 53 L22 50 L47 47 Z" fill="currentColor" />
-              </svg>
-            </span>RN
+          <Link to="/" className="footer-logo-brand-link">
+            <img src="/images/logo.png" alt="UNICORN ONYX Logo" className="footer-logo-img" />
+            <span className="footer-logo-text">UNICORN ONYX</span>
           </Link>
           <div className="footer-cross-divider">
             <svg viewBox="0 0 100 100" width="12" height="12" className="footer-cross-svg">

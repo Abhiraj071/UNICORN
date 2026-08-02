@@ -67,7 +67,7 @@ const Navbar = ({ showCompletionBanner }) => {
           {/* Center: Logo */}
           <div className="nav-center">
             <Link to="/" className="logo-brand-link">
-              <span className="logo-text">UNICORN ONYX</span>
+              <span className="logo-text">UNICORN</span>
             </Link>
           </div>
 
@@ -115,7 +115,7 @@ const Navbar = ({ showCompletionBanner }) => {
         <div className="mobile-menu-header">
           <div className="spacer"></div>
           <Link to="/" className="logo-brand-link mobile-logo-link" onClick={() => setMobileMenuOpen(false)}>
-            <span className="logo-text">UNICORN ONYX</span>
+            <span className="logo-text">UNICORN</span>
           </Link>
           <button className="icon-btn close-btn" onClick={() => setMobileMenuOpen(false)}>
             <X size={28} />

@@ -86,17 +86,18 @@
 
 .logo-text {
   font-family: var(--font-heading-decorative), 'Cinzel', serif;
-  font-size: 1.6rem;
-  letter-spacing: 5px;
+  font-size: 1.8rem;
+  letter-spacing: 6px;
   color: var(--text-primary, #ffffff);
   font-weight: 700;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .desktop-nav {
   display: flex;
-  gap: 2.5rem;
-  margin: 0 2rem;
+  gap: 1.8rem;
+  margin: 0 1.5rem;
 }
 
 .desktop-nav a {
